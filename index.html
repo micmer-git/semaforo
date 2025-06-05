@@ -1,98 +1,252 @@
-<!DOCTYPE html><html lang="it">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Semaforo di Orezzo – Live Sync</title>
-  <!-- TailwindCSS CDN (v4) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Dark mode friendly & modern font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      @apply bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white font-inter min-h-screen flex flex-col items-center justify-center gap-8 overflow-hidden;
-    }
-    .lamp {
-      @apply h-20 w-20 rounded-full bg-slate-700 transition-colors duration-300 shadow-inner;
-    }
-    .on {
-      @apply shadow-2xl shadow-current;
-    }
-    #red.on    { background: radial-gradient(circle at center, #ff4d4d, #7f1d1d); }
-    #orange.on { background: radial-gradient(circle at center, #f59e0b, #78350f); }
-    #green.on  { background: radial-gradient(circle at center, #22c55e, #065f46); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orezzo Semaforo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --traffic-light-width: 150px;
+            --traffic-light-height: 450px;
+            --light-size: 100px;
+            --spacing: 20px;
+            --off-color: #333;
+            --red-on: #ff0000;
+            --orange-on: #ffa500;
+            --green-on: #00ff00;
+            --background-gradient: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%);
+            --panel-background: #ffffff;
+            --text-color: #333;
+            --border-radius-large: 20px;
+            --border-radius-small: 50%;
+            --box-shadow-light: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --box-shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: var(--background-gradient);
+            color: var(--text-color);
+            overflow: hidden; /* Prevent scroll on small overflows */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #app-title {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+
+        #traffic-light-container {
+            width: var(--traffic-light-width);
+            height: var(--traffic-light-height);
+            background-color: #222;
+            border-radius: var(--border-radius-large);
+            padding: var(--spacing);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: var(--box-shadow-heavy);
+            margin-bottom: 30px;
+            border: 2px solid #444; /* Subtle border */
+        }
+
+        .light {
+            width: var(--light-size);
+            height: var(--light-size);
+            border-radius: var(--border-radius-small);
+            background-color: var(--off-color);
+            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); /* Inner shadow for off state */
+            border: 2px solid #555;
+        }
+
+        .light.active.red {
+            background: radial-gradient(circle at center, var(--red-on) 0%, darken(var(--red-on), 20%) 80%);
+            box-shadow: 0 0 20px var(--red-on), inset 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .light.active.orange {
+            background: radial-gradient(circle at center, var(--orange-on) 0%, darken(var(--orange-on), 20%) 80%);
+            box-shadow: 0 0 20px var(--orange-on), inset 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .light.active.green {
+            background: radial-gradient(circle at center, var(--green-on) 0%, darken(var(--green-on), 20%) 80%);
+            box-shadow: 0 0 20px var(--green-on), inset 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        #time-display {
+            background-color: var(--panel-background);
+            border-radius: var(--border-radius-large);
+            padding: var(--spacing);
+            box-shadow: var(--box-shadow-light);
+            text-align: center;
+            width: 80vw; /* Responsive width */
+            max-width: 400px; /* Max width for larger screens */
+            box-sizing: border-box;
+            border: 1px solid #e0e0e0;
+        }
+
+        #time-display p {
+            margin: 10px 0;
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+
+        #time-display span {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        /* Darken function for CSS variables - using SCSS-like syntax but pure CSS won't support it directly.
+           Will rely on pre-defined darker shades or a simple filter in JS.
+           For this pure HTML/CSS, I'll use fixed values for darker shades.
+        */
+        .light.active.red { background: radial-gradient(circle at center, #ff0000 0%, #cc0000 80%); }
+        .light.active.orange { background: radial-gradient(circle at center, #ffa500 0%, #cc8400 80%); }
+        .light.active.green { background: radial-gradient(circle at center, #00ff00 0%, #00cc00 80%); }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            :root {
+                --traffic-light-width: 120px;
+                --traffic-light-height: 360px;
+                --light-size: 80px;
+                --spacing: 15px;
+            }
+            #app-title {
+                font-size: 2em;
+                margin-bottom: 20px;
+            }
+            #time-display p {
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 400px) {
+            :root {
+                --traffic-light-width: 100px;
+                --traffic-light-height: 300px;
+                --light-size: 70px;
+                --spacing: 10px;
+            }
+            #app-title {
+                font-size: 1.8em;
+            }
+        }
+    </style>
 </head>
 <body>
-  <header class="text-center animate-fade-in-down">
-    <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight">Semaforo di <span class="text-emerald-400">Orezzo</span></h1>
-    <p class="text-sm text-slate-400 mt-2">Sincronizzato con <a href="https://time.is/Europe/Rome" target="_blank" class="underline decoration-dotted">time.is</a></p>
-  </header>  <!-- Traffic light -->  <section id="traffic" class="flex flex-col items-center gap-6 bg-slate-800/50 backdrop-blur-lg px-10 py-8 rounded-3xl shadow-xl ring-1 ring-white/10 animate-fade-in-up">
-    <div id="red"    class="lamp"></div>
-    <div id="orange" class="lamp"></div>
-    <div id="green"  class="lamp"></div>
-  </section>  <!-- Live clock -->  <div id="clock" class="font-mono text-4xl tracking-widest animate-fade-in-up"></div>  <script>
-    // ------------- CONFIGURATION -------------------
-    const GREEN_DURATION   = 31;     // seconds
-    const ORANGE_DURATION  = 5;      // seconds (fixed)
-    const CYCLES_BETWEEN   = 118;    // cycles between reference greens
+    <h1 id="app-title">Orezzo Semaforo</h1>
 
-    // Reference observations (Europe/Rome timezone)
-    const REF1 = new Date('2025-06-04T19:24:10+02:00');
-    const REF2 = new Date('2025-06-05T11:28:42+02:00');
+    <div id="traffic-light-container">
+        <div id="red-light" class="light"></div>
+        <div id="orange-light" class="light"></div>
+        <div id="green-light" class="light"></div>
+    </div>
 
-    // Derived RED duration and cycle length (using high‑precision floating‑point)
-    const totalCycle = (REF2 - REF1) / 1000 / CYCLES_BETWEEN;      // ≈ 490.45 s
-    const RED_DURATION = totalCycle - (GREEN_DURATION + ORANGE_DURATION); // ≈ 454.44 s
+    <div id="time-display">
+        <p>Current Time: <span id="current-time"></span></p>
+        <p>Next Change in: <span id="time-in-phase"></span></p>
+        <p>Current Phase: <span id="current-phase"></span></p>
+    </div>
 
-    // Elements
-    const lamps = {
-      red:    document.getElementById('red'),
-      orange: document.getElementById('orange'),
-      green:  document.getElementById('green')
-    };
-    const clockEl = document.getElementById('clock');
+    <script>
+        const greenDuration = 31 * 1000; // 31 seconds
+        const orangeDuration = 5 * 1000; // 5 seconds
+        const redDuration = 454.44 * 1000; // 454.44 seconds
+        const totalCycleDuration = greenDuration + orangeDuration + redDuration; // Total cycle in milliseconds
 
-    // Accurate time offset versus server (time.is compatible via worldtimeapi.org)
-    let offsetMs = 0;
-    fetch('https://worldtimeapi.org/api/timezone/Europe/Rome')
-      .then(r => r.json()).then(data => {
-        const serverTime = new Date(data.datetime).getTime();
-        offsetMs = serverTime - Date.now();
-      })
-      .catch(() => console.warn('Fallback to local system clock – accuracy may vary'));
+        // Observed green light start times (CEST, as per the problem description for observation)
+        // We'll convert these to UTC for consistent internal calculations
+        const orezzoGreen1 = new Date('2025-06-04T19:24:10+02:00').getTime(); // June 4, 19:24:10 CEST
+        const orezzoGreen2 = new Date('2025-06-05T11:28:42+02:00').getTime(); // June 5, 11:28:42 CEST
 
-    function now() { return Date.now() + offsetMs; }
+        // Calculate a consistent green light reference point.
+        // We'll use the latest observation and project it to the current cycle.
+        const currentRefGreenTime = orezzoGreen2; // Use the most recent observation as base
 
-    function update() {
-      const elapsed = (now() - REF1.getTime()) / 1000; // seconds since first reference
-      const cyclePos = ((elapsed % totalCycle) + totalCycle) % totalCycle; // 0…cycle
+        const redLight = document.getElementById('red-light');
+        const orangeLight = document.getElementById('orange-light');
+        const greenLight = document.getElementById('green-light');
+        const currentTimeDisplay = document.getElementById('current-time');
+        const timeInPhaseDisplay = document.getElementById('time-in-phase');
+        const currentPhaseDisplay = document.getElementById('current-phase');
 
-      // Determine current phase
-      let phase;
-      if (cyclePos < GREEN_DURATION) {
-        phase = 'green';
-      } else if (cyclePos < GREEN_DURATION + ORANGE_DURATION) {
-        phase = 'orange';
-      } else {
-        phase = 'red';
-      }
+        function updateTrafficLight() {
+            const now = new Date();
+            currentTimeDisplay.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
-      // Apply visual state
-      for (const [key, el] of Object.entries(lamps)) {
-        if (key === phase) {
-          el.classList.add('on');
-        } else {
-          el.classList.remove('on');
+            // Calculate elapsed time from the reference green light start
+            const elapsedTimeSinceRef = now.getTime() - currentRefGreenTime;
+
+            // Calculate the time within the current cycle
+            // Use modulo to wrap around the total cycle duration
+            const timeInCurrentCycle = (elapsedTimeSinceRef % totalCycleDuration + totalCycleDuration) % totalCycleDuration;
+
+            let currentPhase = '';
+            let timeRemainingInPhase = 0;
+
+            // Reset all lights
+            redLight.classList.remove('active', 'red');
+            orangeLight.classList.remove('active', 'orange');
+            greenLight.classList.remove('active', 'green');
+
+            if (timeInCurrentCycle < greenDuration) {
+                // Green phase
+                greenLight.classList.add('active', 'green');
+                currentPhase = 'Green';
+                timeRemainingInPhase = greenDuration - timeInCurrentCycle;
+            } else if (timeInCurrentCycle < greenDuration + orangeDuration) {
+                // Orange phase
+                orangeLight.classList.add('active', 'orange');
+                currentPhase = 'Orange';
+                timeRemainingInPhase = (greenDuration + orangeDuration) - timeInCurrentCycle;
+            } else {
+                // Red phase
+                redLight.classList.add('active', 'red');
+                currentPhase = 'Red';
+                timeRemainingInPhase = totalCycleDuration - timeInCurrentCycle;
+            }
+
+            currentPhaseDisplay.textContent = currentPhase;
+            timeInPhaseDisplay.textContent = formatTime(Math.max(0, timeRemainingInPhase / 1000));
         }
-      }
 
-      // Render digital clock (hh:mm:ss)
-      const d = new Date(now());
-      clockEl.textContent = d.toLocaleTimeString('it-IT', { hour12:false });
-    }
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = Math.floor(totalSeconds % 60);
+            const milliseconds = Math.floor((totalSeconds - Math.floor(totalSeconds)) * 1000);
 
-    // First paint immediately; then refresh ~10×/s for smoothness
-    update();
-    setInterval(update, 100);
-  </script></body>
+            let formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            // Only show milliseconds for finer precision when it's critical (e.g., last few seconds)
+            if (totalSeconds < 10) { // Show milliseconds for last 10 seconds
+                 formatted += `.${String(milliseconds).padStart(3, '0')}`;
+            } else if (totalSeconds < 60) { // Show milliseconds for last minute
+                formatted += `.${String(milliseconds).padStart(3, '0').substring(0, 1)}`; // show one decimal
+            }
+            return formatted;
+        }
+
+        // Initial update
+        updateTrafficLight();
+
+        // Update every 100 milliseconds for smooth countdown
+        setInterval(updateTrafficLight, 100);
+    </script>
+</body>
 </html>
