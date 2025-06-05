@@ -1,63 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semafori Orezzo & Gazzaniga</title>
+    <title>Semafori Sincronizzati | Orezzo & Gazzaniga</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #3498db;
+            --dark-bg: #2c3e50;
+            --light-bg: #ecf0f1;
+            --text-color: #333;
+            --light-off: #5D6D7E;
+            /* Darker grey for off state */
+            --red-on: #e74c3c;
+            --orange-on: #f39c12;
+            --green-on: #2ecc71;
+            --shadow-color: rgba(0, 0, 0, 0.15);
+            --border-radius: 12px;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            /* Changed to flex-start to allow natural flow */
             min-height: 100vh;
             margin: 0;
-            background-color: #f0f2f5;
-            color: #333;
-        }
-
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .traffic-light {
-            background-color: #34495e;
-            padding: 20px;
-            border-radius: 10px;
-            display: inline-block;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        .light {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background-color: #7f8c8d; /* Off state */
-            margin: 10px;
-            border: 3px solid #2c3e50;
-            transition: background-color 0.3s ease;
-        }
-
-        .light.red.active { background-color: #e74c3c; box-shadow: 0 0 20px 5px #e74c3c; }
-        .light.orange.active { background-color: #f39c12; box-shadow: 0 0 20px 5px #f39c12; }
-        .light.green.active { background-color: #2ecc71; box-shadow: 0 0 20px 5px #2ecc71; }
-
-        .timer {
-            font-size: 1.2em;
-            margin-top: 10px;
-            color: #3498db;
-            font-weight: bold;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            padding-top: 70px;
+            /* Space for fixed status bar */
+            padding-bottom: 20px;
+            /* Space for footer and notes */
+            box-sizing: border-box;
         }
 
         .status-bar {
@@ -65,155 +45,412 @@
             top: 0;
             left: 0;
             width: 100%;
-            background-color: #3498db;
+            background-color: var(--primary-color);
             color: white;
-            padding: 10px;
+            padding: 12px 20px;
             text-align: center;
-            font-size: 0.9em;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 1em;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            z-index: 1000;
+            box-sizing: border-box;
         }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            /* Max width for content area */
+            padding: 20px;
+            box-sizing: border-box;
+            flex-grow: 1;
+            /* Allows content to push footer down */
+        }
+
+        .semafori-container {
+            display: flex;
+            flex-wrap: wrap;
+            /* Allows stacking on smaller screens */
+            justify-content: center;
+            align-items: flex-start;
+            /* Align items at the top */
+            gap: 30px;
+            margin-bottom: 30px;
+            /* Space before notes section */
+        }
+
+        .semaforo-wrapper {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 6px 20px var(--shadow-color);
+            text-align: center;
+            width: calc(50% - 40px);
+            /* For side-by-side, accounting for gap */
+            min-width: 300px;
+            /* Minimum width before stacking */
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+        }
+
+        .semaforo-wrapper:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: var(--dark-bg);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .traffic-light-housing {
+            background-color: var(--dark-bg);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            margin: 0 auto 15px auto;
+            width: fit-content;
+        }
+
+        .light {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background-color: var(--light-off);
+            margin: 8px;
+            border: 2px solid #1c2833;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .light::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            width: 20px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px / 5px;
+            transform: rotate(45deg);
+            opacity: 0.7;
+        }
+
+        .light.red.active {
+            background-color: var(--red-on);
+            box-shadow: 0 0 25px 8px var(--red-on);
+        }
+
+        .light.orange.active {
+            background-color: var(--orange-on);
+            box-shadow: 0 0 25px 8px var(--orange-on);
+        }
+
+        .light.green.active {
+            background-color: var(--green-on);
+            box-shadow: 0 0 25px 8px var(--green-on);
+        }
+
+        .timer {
+            font-size: 1.3em;
+            margin-top: 15px;
+            color: var(--primary-color);
+            font-weight: 700;
+            min-height: 25px;
+        }
+
         .error-message {
-            color: #e74c3c;
+            color: var(--red-on);
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(231, 76, 60, 0.1);
+            border-radius: 6px;
+            display: none;
+            /* Hidden by default */
+            text-align: center;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        .notes-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px var(--shadow-color);
+            margin-top: 20px;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .notes-section h2 {
+            color: var(--dark-bg);
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+
+        .notes-section p {
+            margin-bottom: 10px;
+        }
+
+        .notes-section ul {
+            margin-left: 20px;
+            padding-left: 0;
+        }
+
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            /* Reduced top padding as notes section is above */
+            background-color: transparent;
+            /* Footer blends with body bg now */
+            color: var(--dark-bg);
+            font-size: 0.9em;
+            margin-top: 20px;
+            /* Space after notes or content */
+            box-sizing: border-box;
+        }
+
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 60px;
+            }
+
+            .content-wrapper {
+                padding: 15px;
+            }
+
+            .semafori-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 25px;
+            }
+
+            .semaforo-wrapper {
+                width: 100%;
+                max-width: 400px;
+                min-width: unset;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .light {
+                width: 55px;
+                height: 55px;
+                margin: 7px;
+            }
+
+            .timer {
+                font-size: 1.1em;
+            }
+
+            .status-bar {
+                font-size: 0.85em;
+                padding: 10px 15px;
+            }
+
+            .notes-section h2 {
+                font-size: 1.2em;
+            }
+
+            .notes-section {
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
+
 <body>
 
-    <div class="status-bar" id="timeStatus">Fetching current time... 🌍</div>
+    <div class="status-bar" id="timeStatus">Recupero ora corrente... 🌍</div>
 
-    <div class="container">
-        <h1>🚦 Orezzo Semaforo</h1>
-        <div class="traffic-light" id="orezzo">
-            <div class="light red" id="orezzo-red"></div>
-            <div class="light orange" id="orezzo-orange"></div>
-            <div class="light green" id="orezzo-green"></div>
+    <div class="content-wrapper">
+        <div class="semafori-container">
+            <div class="semaforo-wrapper">
+                <h1>🚦 Semaforo Orezzo</h1>
+                <div class="traffic-light-housing">
+                    <div class="light red" id="orezzo-red"></div>
+                    <div class="light orange" id="orezzo-orange"></div>
+                    <div class="light green" id="orezzo-green"></div>
+                </div>
+                <div class="timer" id="orezzo-timer">-- s</div>
+            </div>
+
+            <div class="semaforo-wrapper">
+                <h1>🚦 Semaforo Gazzaniga</h1>
+                <div class="traffic-light-housing">
+                    <div class="light red" id="gazzaniga-red"></div>
+                    <div class="light orange" id="gazzaniga-orange"></div>
+                    <div class="light green" id="gazzaniga-green"></div>
+                </div>
+                <div class="timer" id="gazzaniga-timer">-- s</div>
+            </div>
         </div>
-        <div class="timer" id="orezzo-timer">-- s</div>
-    </div>
+        <div id="error-container" class="error-message"></div>
 
-    <hr style="width: 80%; border: 1px solid #ddd; margin: 30px 0;">
 
-    <div class="container">
-        <h1>🚦 Gazzaniga Semaforo</h1>
-        <div class="traffic-light" id="gazzaniga">
-            <div class="light red" id="gazzaniga-red"></div>
-            <div class="light orange" id="gazzaniga-orange"></div>
-            <div class="light green" id="gazzaniga-green"></div>
-        </div>
-        <div class="timer" id="gazzaniga-timer">-- s</div>
-    </div>
-    <div id="error-container" class="error-message"></div>
 
-<script>
-    const GREEN_TIME = 31; // seconds
-    const ORANGE_TIME = 5; // seconds
-    const RED_TIME = (7 * 60) + 35; // 7 minutes and 35 seconds
-    const CYCLE_TIME = GREEN_TIME + ORANGE_TIME + RED_TIME;
+    <footer>
+        Sviluppato da <a href="https://linktr.ee/micmer" target="_blank" rel="noopener noreferrer">MicMer</a> &copy;
+        2024-2025
+    </footer>
 
-    // Reference green times (in UTC to avoid timezone issues with Date parsing)
-    // User provided local times. Assuming they are for Italy (CEST, UTC+2 during DST)
-    // To make it robust, we'll use UTC.
-    // Gazzaniga: 3rd of June, 12:57:15 CEST == 2025-06-03T10:57:15Z
-    // Orezzo:    4th of June, 19:24:10 CEST == 2025-06-04T17:24:10Z
-    const GAZZANIGA_GREEN_REF_MS = Date.UTC(2025, 5, 3, 10, 57, 15); // Month is 0-indexed (5 = June)
-    const OREZZO_GREEN_REF_MS = Date.UTC(2025, 5, 4, 17, 24, 10);
+    <script>
+        const GREEN_TIME = 31; // seconds
+        const ORANGE_TIME = 5; // seconds
+        const RED_TIME = (7 * 60) + 35; // 7 minutes and 35 seconds
+        const CYCLE_TIME = GREEN_TIME + ORANGE_TIME + RED_TIME;
 
-    const gazzanigaRed = document.getElementById('gazzaniga-red');
-    const gazzanigaOrange = document.getElementById('gazzaniga-orange');
-    const gazzanigaGreen = document.getElementById('gazzaniga-green');
-    const gazzanigaTimer = document.getElementById('gazzaniga-timer');
+        // Reference green times (UTC)
+        // Gazzaniga: 3rd of June 2025, 12:57:15 CEST (UTC+2) -> 2025-06-03T10:57:15Z
+        // Orezzo:    4th of June 2025, 19:24:10 CEST (UTC+2) -> 2025-06-04T17:24:10Z
+        const GAZZANIGA_GREEN_REF_MS = Date.UTC(2025, 5, 3, 10, 57, 15); // Month is 0-indexed (5 = June)
+        const OREZZO_GREEN_REF_MS = Date.UTC(2025, 5, 4, 17, 24, 10);
 
-    const orezzoRed = document.getElementById('orezzo-red');
-    const orezzoOrange = document.getElementById('orezzo-orange');
-    const orezzoGreen = document.getElementById('orezzo-green');
-    const orezzoTimer = document.getElementById('orezzo-timer');
 
-    const timeStatus = document.getElementById('timeStatus');
-    const errorContainer = document.getElementById('error-container');
+        const gazzanigaRed = document.getElementById('gazzaniga-red');
+        const gazzanigaOrange = document.getElementById('gazzaniga-orange');
+        const gazzanigaGreen = document.getElementById('gazzaniga-green');
+        const gazzanigaTimer = document.getElementById('gazzaniga-timer');
 
-    let timeOffset = 0; // Difference between local time and server time in ms
+        const orezzoRed = document.getElementById('orezzo-red');
+        const orezzoOrange = document.getElementById('orezzo-orange');
+        const orezzoGreen = document.getElementById('orezzo-green');
+        const orezzoTimer = document.getElementById('orezzo-timer');
 
-    async function fetchTimeIs() {
-        try {
-            const response = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=Europe/Rome', { cache: 'no-store' });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+        const timeStatus = document.getElementById('timeStatus');
+        const errorContainer = document.getElementById('error-container');
+
+        let timeOffset = 0; // Difference between local time and server time in ms
+        let serverTimeInitialized = false;
+
+        async function fetchTimeIs() {
+            try {
+                const response = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=Europe/Rome', { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`Errore HTTP! Stato: ${response.status}`);
+                }
+                const data = await response.json();
+                const serverTime = new Date(data.dateTime).getTime();
+                const localTime = Date.now();
+                timeOffset = serverTime - localTime;
+                serverTimeInitialized = true;
+                timeStatus.textContent = `🕒 Ora sincronizzata (Europe/Rome): ${new Date(serverTime).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+                errorContainer.classList.remove('visible');
+                return serverTime;
+            } catch (error) {
+                console.error("Impossibile recuperare l'ora da timeapi.io:", error);
+                timeStatus.textContent = "⚠️ Sincronizzazione ora fallita. Uso ora locale.";
+                errorContainer.textContent = "Impossibile connettersi al server dell'ora. La sincronizzazione dei semafori potrebbe non essere precisa. Controlla la tua connessione internet.";
+                errorContainer.classList.add('visible');
+                serverTimeInitialized = false;
+                return Date.now();
             }
-            const data = await response.json();
-            const serverTime = new Date(data.dateTime).getTime();
-            const localTime = Date.now();
-            timeOffset = serverTime - localTime;
-            timeStatus.textContent = `🕒 Time synchronized with Europe/Rome: ${new Date(serverTime).toLocaleString('it-IT')}`;
-            errorContainer.textContent = ''; // Clear previous errors
-            return serverTime;
-        } catch (error) {
-            console.error("Failed to fetch time from timeapi.io:", error);
-            timeStatus.textContent = "⚠️ Time sync failed. Using local time. Accuracy may vary.";
-            errorContainer.textContent = "Could not connect to the time server. The traffic lights might not be perfectly synchronized. Please check your internet connection.";
-            // Fallback to local time if API fails
-            return Date.now();
         }
-    }
 
-    function getCurrentSynchronizedTime() {
-        return Date.now() + timeOffset;
-    }
+        function getCurrentSynchronizedTime() {
+            return Date.now() + timeOffset;
+        }
 
-    function updateTrafficLight(name, referenceGreenMs, redLight, orangeLight, greenLight, timerDisplay) {
-        const nowMs = getCurrentSynchronizedTime();
-        const elapsedMsSinceRefGreen = nowMs - referenceGreenMs;
+        function updateTrafficLight(name, referenceGreenMs, redLight, orangeLight, greenLight, timerDisplay) {
+            const nowMs = getCurrentSynchronizedTime();
 
-        if (elapsedMsSinceRefGreen < 0) {
-            // Reference time is in the future, show all off or default to red
-            redLight.classList.add('active');
+            // Check if reference time is valid.
+            // If serverTimeInitialized is true and ref time is in the future, show waiting.
+            // If ref time is in the past (which it will be for the given dates as of June 5th, 2025), proceed to calculate cycle.
+            if (isNaN(referenceGreenMs)) {
+                redLight.classList.remove('active');
+                orangeLight.classList.remove('active');
+                greenLight.classList.remove('active');
+                timerDisplay.textContent = `Errore Config.`;
+                return;
+            }
+
+            if (serverTimeInitialized && referenceGreenMs > nowMs) {
+                redLight.classList.add('active'); // Default to red if waiting for a future start
+                orangeLight.classList.remove('active');
+                greenLight.classList.remove('active');
+                const waitSeconds = Math.round((referenceGreenMs - nowMs) / 1000);
+                timerDisplay.textContent = `Attesa: ${waitSeconds > 0 ? waitSeconds : 0}s`;
+                return;
+            }
+
+            const elapsedMsSinceRefGreen = nowMs - referenceGreenMs;
+            // If elapsedMsSinceRefGreen is negative (and server time not init, or ref time is future but somehow bypassed above),
+            // this implies ref time is in the future. For simplicity, we assume past or current ref times for main logic here.
+            // The check above (referenceGreenMs > nowMs) should handle future starts when time is synced.
+            // If time is not synced, and ref is future, it might show a large negative, then wrap with modulo.
+            // It's generally better to ensure nowMs >= referenceGreenMs for this modulo logic to be intuitive.
+            // However, since our current dates are in the past, elapsedMsSinceRefGreen will be positive.
+
+            const timeIntoCycle = (elapsedMsSinceRefGreen / 1000) % CYCLE_TIME;
+
+            let state = "";
+            let timeLeftInState = 0;
+
+            redLight.classList.remove('active');
             orangeLight.classList.remove('active');
             greenLight.classList.remove('active');
-            timerDisplay.textContent = `Starts in ${Math.round(-elapsedMsSinceRefGreen / 1000)}s`;
-            return;
+
+            if (timeIntoCycle < GREEN_TIME) {
+                state = "Verde";
+                greenLight.classList.add('active');
+                timeLeftInState = GREEN_TIME - timeIntoCycle;
+            } else if (timeIntoCycle < GREEN_TIME + ORANGE_TIME) {
+                state = "Arancione";
+                orangeLight.classList.add('active');
+                timeLeftInState = (GREEN_TIME + ORANGE_TIME) - timeIntoCycle;
+            } else {
+                state = "Rosso";
+                redLight.classList.add('active');
+                timeLeftInState = CYCLE_TIME - timeIntoCycle;
+            }
+            timerDisplay.textContent = `${state}: ${Math.ceil(timeLeftInState)}s`;
         }
 
-        const timeIntoCycle = (elapsedMsSinceRefGreen / 1000) % CYCLE_TIME; // in seconds
+        async function initialize() {
+            await fetchTimeIs();
 
-        let state = "";
-        let timeLeftInState = 0;
+            setInterval(() => {
+                updateTrafficLight("Orezzo", OREZZO_GREEN_REF_MS, orezzoRed, orezzoOrange, orezzoGreen, orezzoTimer);
+                updateTrafficLight("Gazzaniga", GAZZANIGA_GREEN_REF_MS, gazzanigaRed, gazzanigaOrange, gazzanigaGreen, gazzanigaTimer);
+            }, 1000);
 
-        redLight.classList.remove('active');
-        orangeLight.classList.remove('active');
-        greenLight.classList.remove('active');
-
-        if (timeIntoCycle < GREEN_TIME) {
-            state = "Green";
-            greenLight.classList.add('active');
-            timeLeftInState = GREEN_TIME - timeIntoCycle;
-        } else if (timeIntoCycle < GREEN_TIME + ORANGE_TIME) {
-            state = "Orange";
-            orangeLight.classList.add('active');
-            timeLeftInState = (GREEN_TIME + ORANGE_TIME) - timeIntoCycle;
-        } else {
-            state = "Red";
-            redLight.classList.add('active');
-            timeLeftInState = CYCLE_TIME - timeIntoCycle;
-        }
-        timerDisplay.textContent = `${state}: ${Math.ceil(timeLeftInState)}s`;
-    }
-
-    async function initialize() {
-        await fetchTimeIs(); // Fetch and set time offset
-
-        setInterval(() => {
-            updateTrafficLight("Gazzaniga", GAZZANIGA_GREEN_REF_MS, gazzanigaRed, gazzanigaOrange, gazzanigaGreen, gazzanigaTimer);
             updateTrafficLight("Orezzo", OREZZO_GREEN_REF_MS, orezzoRed, orezzoOrange, orezzoGreen, orezzoTimer);
-        }, 1000); // Update every second
+            updateTrafficLight("Gazzaniga", GAZZANIGA_GREEN_REF_MS, gazzanigaRed, gazzanigaOrange, gazzanigaGreen, gazzanigaTimer);
+        }
 
-        // Initial update
-        updateTrafficLight("Gazzaniga", GAZZANIGA_GREEN_REF_MS, gazzanigaRed, gazzanigaOrange, gazzanigaGreen, gazzanigaTimer);
-        updateTrafficLight("Orezzo", OREZZO_GREEN_REF_MS, orezzoRed, orezzoOrange, orezzoGreen, orezzoTimer);
-    }
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                console.log("Pagina visibile, riverifico sincronizzazione ora.");
+                fetchTimeIs();
+            }
+        });
 
-    initialize();
+        initialize();
 
-</script>
+    </script>
 </body>
+
 </html>
