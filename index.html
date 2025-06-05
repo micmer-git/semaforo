@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semafori Orezzo & Gazzaniga</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .traffic-light {
+            background-color: #34495e;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .light {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: #7f8c8d; /* Off state */
+            margin: 10px;
+            border: 3px solid #2c3e50;
+            transition: background-color 0.3s ease;
+        }
+
+        .light.red.active { background-color: #e74c3c; box-shadow: 0 0 20px 5px #e74c3c; }
+        .light.orange.active { background-color: #f39c12; box-shadow: 0 0 20px 5px #f39c12; }
+        .light.green.active { background-color: #2ecc71; box-shadow: 0 0 20px 5px #2ecc71; }
+
+        .timer {
+            font-size: 1.2em;
+            margin-top: 10px;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .error-message {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="status-bar" id="timeStatus">Fetching current time... 🌍</div>
+
+    <div class="container">
+        <h1>🚦 Orezzo Semaforo</h1>
+        <div class="traffic-light" id="orezzo">
+            <div class="light red" id="orezzo-red"></div>
+            <div class="light orange" id="orezzo-orange"></div>
+            <div class="light green" id="orezzo-green"></div>
+        </div>
+        <div class="timer" id="orezzo-timer">-- s</div>
+    </div>
+
+    <hr style="width: 80%; border: 1px solid #ddd; margin: 30px 0;">
+
+    <div class="container">
+        <h1>🚦 Gazzaniga Semaforo</h1>
+        <div class="traffic-light" id="gazzaniga">
+            <div class="light red" id="gazzaniga-red"></div>
+            <div class="light orange" id="gazzaniga-orange"></div>
+            <div class="light green" id="gazzaniga-green"></div>
+        </div>
+        <div class="timer" id="gazzaniga-timer">-- s</div>
+    </div>
+    <div id="error-container" class="error-message"></div>
+
+<script>
+    const GREEN_TIME = 31; // seconds
+    const ORANGE_TIME = 5; // seconds
+    const RED_TIME = (7 * 60) + 35; // 7 minutes and 35 seconds
+    const CYCLE_TIME = GREEN_TIME + ORANGE_TIME + RED_TIME;
+
+    // Reference green times (in UTC to avoid timezone issues with Date parsing)
+    // User provided local times. Assuming they are for Italy (CEST, UTC+2 during DST)
+    // To make it robust, we'll use UTC.
+    // Gazzaniga: 3rd of June, 12:57:15 CEST == 2025-06-03T10:57:15Z
+    // Orezzo:    4th of June, 19:24:10 CEST == 2025-06-04T17:24:10Z
+    const GAZZANIGA_GREEN_REF_MS = Date.UTC(2025, 5, 3, 10, 57, 15); // Month is 0-indexed (5 = June)
+    const OREZZO_GREEN_REF_MS = Date.UTC(2025, 5, 4, 17, 24, 10);
+
+    const gazzanigaRed = document.getElementById('gazzaniga-red');
+    const gazzanigaOrange = document.getElementById('gazzaniga-orange');
+    const gazzanigaGreen = document.getElementById('gazzaniga-green');
+    const gazzanigaTimer = document.getElementById('gazzaniga-timer');
+
+    const orezzoRed = document.getElementById('orezzo-red');
+    const orezzoOrange = document.getElementById('orezzo-orange');
+    const orezzoGreen = document.getElementById('orezzo-green');
+    const orezzoTimer = document.getElementById('orezzo-timer');
+
+    const timeStatus = document.getElementById('timeStatus');
+    const errorContainer = document.getElementById('error-container');
+
+    let timeOffset = 0; // Difference between local time and server time in ms
+
+    async function fetchTimeIs() {
+        try {
+            const response = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=Europe/Rome', { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const serverTime = new Date(data.dateTime).getTime();
+            const localTime = Date.now();
+            timeOffset = serverTime - localTime;
+            timeStatus.textContent = `🕒 Time synchronized with Europe/Rome: ${new Date(serverTime).toLocaleString('it-IT')}`;
+            errorContainer.textContent = ''; // Clear previous errors
+            return serverTime;
+        } catch (error) {
+            console.error("Failed to fetch time from timeapi.io:", error);
+            timeStatus.textContent = "⚠️ Time sync failed. Using local time. Accuracy may vary.";
+            errorContainer.textContent = "Could not connect to the time server. The traffic lights might not be perfectly synchronized. Please check your internet connection.";
+            // Fallback to local time if API fails
+            return Date.now();
+        }
+    }
+
+    function getCurrentSynchronizedTime() {
+        return Date.now() + timeOffset;
+    }
+
+    function updateTrafficLight(name, referenceGreenMs, redLight, orangeLight, greenLight, timerDisplay) {
+        const nowMs = getCurrentSynchronizedTime();
+        const elapsedMsSinceRefGreen = nowMs - referenceGreenMs;
+
+        if (elapsedMsSinceRefGreen < 0) {
+            // Reference time is in the future, show all off or default to red
+            redLight.classList.add('active');
+            orangeLight.classList.remove('active');
+            greenLight.classList.remove('active');
+            timerDisplay.textContent = `Starts in ${Math.round(-elapsedMsSinceRefGreen / 1000)}s`;
+            return;
+        }
+
+        const timeIntoCycle = (elapsedMsSinceRefGreen / 1000) % CYCLE_TIME; // in seconds
+
+        let state = "";
+        let timeLeftInState = 0;
+
+        redLight.classList.remove('active');
+        orangeLight.classList.remove('active');
+        greenLight.classList.remove('active');
+
+        if (timeIntoCycle < GREEN_TIME) {
+            state = "Green";
+            greenLight.classList.add('active');
+            timeLeftInState = GREEN_TIME - timeIntoCycle;
+        } else if (timeIntoCycle < GREEN_TIME + ORANGE_TIME) {
+            state = "Orange";
+            orangeLight.classList.add('active');
+            timeLeftInState = (GREEN_TIME + ORANGE_TIME) - timeIntoCycle;
+        } else {
+            state = "Red";
+            redLight.classList.add('active');
+            timeLeftInState = CYCLE_TIME - timeIntoCycle;
+        }
+        timerDisplay.textContent = `${state}: ${Math.ceil(timeLeftInState)}s`;
+    }
+
+    async function initialize() {
+        await fetchTimeIs(); // Fetch and set time offset
+
+        setInterval(() => {
+            updateTrafficLight("Gazzaniga", GAZZANIGA_GREEN_REF_MS, gazzanigaRed, gazzanigaOrange, gazzanigaGreen, gazzanigaTimer);
+            updateTrafficLight("Orezzo", OREZZO_GREEN_REF_MS, orezzoRed, orezzoOrange, orezzoGreen, orezzoTimer);
+        }, 1000); // Update every second
+
+        // Initial update
+        updateTrafficLight("Gazzaniga", GAZZANIGA_GREEN_REF_MS, gazzanigaRed, gazzanigaOrange, gazzanigaGreen, gazzanigaTimer);
+        updateTrafficLight("Orezzo", OREZZO_GREEN_REF_MS, orezzoRed, orezzoOrange, orezzoGreen, orezzoTimer);
+    }
+
+    initialize();
+
+</script>
+</body>
+</html>
