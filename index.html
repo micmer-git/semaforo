@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orezzo Semaforo</title>
+    <title>Stato Semaforo</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -11,11 +11,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            min-height: 100vh; /* Full height */
+            width: 100vw; /* Full width */
+            margin: 0;
+            padding: 0;
             background-color: #f0f2f5;
             color: #333;
-            margin: 0;
-            padding: 20px;
+            overflow: hidden; /* Prevent scrolling */
             box-sizing: border-box;
         }
 
@@ -23,21 +25,53 @@
             background-color: #ffffff;
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px 40px;
+            padding: 20px 30px; /* Reduced padding for mobile */
             text-align: center;
             max-width: 500px;
-            width: 100%;
+            width: 95%; /* Adjust width for mobile */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         h1 {
             color: #2c3e50;
-            margin-bottom: 25px;
-            font-size: 2.2em;
+            margin-bottom: 15px; /* Reduced margin */
+            font-size: 2em; /* Adjusted font size */
+        }
+
+        .selector-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .selector-button {
+            background-color: #e0e0e0;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            color: #555;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+
+        .selector-button.active {
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.4);
         }
 
         .current-time, .sync-info {
-            font-size: 1.1em;
-            margin-bottom: 15px;
+            font-size: 1em; /* Adjusted font size */
+            margin-bottom: 10px; /* Reduced margin */
             color: #555;
         }
 
@@ -54,18 +88,18 @@
         .semaforo {
             background-color: #3a3a3a;
             border-radius: 20px;
-            padding: 20px;
+            padding: 15px; /* Reduced padding */
             display: inline-block;
-            margin: 25px auto;
+            margin: 20px auto; /* Adjusted margin */
             box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
         }
 
         .light {
-            width: 80px;
-            height: 80px;
+            width: 70px; /* Adjusted size for mobile */
+            height: 70px; /* Adjusted size for mobile */
             border-radius: 50%;
             background-color: #555;
-            margin: 15px;
+            margin: 10px; /* Adjusted margin */
             border: 5px solid #222;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);
             opacity: 0.3;
@@ -91,33 +125,74 @@
         }
 
         .status-message {
-            font-size: 1.4em;
+            font-size: 1.3em; /* Adjusted font size */
             font-weight: bold;
-            margin-top: 20px;
+            margin-top: 15px; /* Adjusted margin */
             color: #34495e;
         }
 
         .countdown {
-            font-size: 1.6em;
+            font-size: 1.5em; /* Adjusted font size */
             font-weight: bold;
             color: #2c3e50;
-            margin-top: 10px;
+            margin-top: 5px; /* Adjusted margin */
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         .footer {
-            margin-top: 30px;
-            font-size: 0.9em;
+            margin-top: 20px; /* Adjusted margin */
+            font-size: 0.85em; /* Adjusted font size */
             color: #777;
+        }
+
+        /* Ensure full height on mobile browsers by accounting for browser UI elements */
+        @supports (-webkit-touch-callout: none) {
+            .container {
+                min-height: -webkit-fill-available;
+            }
+        }
+        @media (max-width: 600px) {
+            body {
+                justify-content: flex-start; /* Align content to top on small screens */
+                padding-top: 15px;
+            }
+            .container {
+                width: 98%;
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .light {
+                width: 60px;
+                height: 60px;
+                margin: 8px;
+            }
+            .status-message {
+                font-size: 1.2em;
+            }
+            .countdown {
+                font-size: 1.4em;
+            }
+            .selector-button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Orezzo Semaforo Status</h1>
+        <h1>Stato Semaforo</h1>
+
+        <div class="selector-container">
+            <button class="selector-button active" id="btnOrezzo">Orezzo</button>
+            <button class="selector-button" id="btnGazzaniga">Gazzaniga</button>
+        </div>
+
         <div class="current-time" id="currentTime"></div>
         <div class="sync-info">
-            For best accuracy, please synchronize your system time with <a href="https://time.is/" target="_blank">time.is</a>
+            Per la massima precisione, sincronizza l'ora del tuo sistema con <a href="https://time.is/" target="_blank">time.is</a>
         </div>
 
         <div class="semaforo">
@@ -131,8 +206,8 @@
     </div>
 
     <div class="footer">
-        <p>Green time: 31s | Orange time: 5s | Red time: 7m 35s</p>
-        <p>Last observed green (Orezzo): June 5th, 11:28:42 (CEST)</p>
+        <p>Verde: 31s | Arancione: 5s | Rosso: 7m 35s</p>
+        <p><span id="lastGreenObserved"></span></p>
     </div>
 
     <script>
@@ -142,22 +217,22 @@
         const RED_DURATION = 455; // 7 minutes 35 seconds = 420 + 35 = 455 seconds
         const CYCLE_DURATION = GREEN_DURATION + ORANGE_DURATION + RED_DURATION; // 31 + 5 + 455 = 491 seconds
 
-        // Reference point: Last observed green light start for Orezzo
-        // June 5th, 11:28:42 (CEST)
+        // Reference points for each semaforo (Green light start)
         // Note: Months are 0-indexed in JavaScript (June is 5)
-        const REFERENCE_DATE_STR = '2025-06-05T11:28:42';
-        const REFERENCE_GREEN_START = new Date(REFERENCE_DATE_STR);
-        // Adjust for CEST offset (UTC+2 in summer) if the user's system is not already in CEST.
-        // For simplicity and assuming local time, we'll use local time.
-        // If the user's browser is in a different timezone, this might need more robust handling.
-        // For accurate calculation, we should convert everything to UTC and then display in local.
-        // For this standalone file, we'll assume the client's clock is set correctly for CEST.
-        // Let's ensure the reference date is treated in the local timezone for consistency with `new Date()`
-        // For more robust timezone handling, libraries like moment-timezone or luxon are recommended.
-        // For now, we'll manually set the time components.
-        REFERENCE_GREEN_START.setFullYear(2025, 5, 5); // Year, Month (0-11), Day
-        REFERENCE_GREEN_START.setHours(11, 28, 42, 0); // Hours, Minutes, Seconds, Milliseconds
+        const SEMAFORI_DATA = {
+            Orezzo: {
+                name: 'Orezzo',
+                referenceDateString: '2025-06-05T11:28:42', // June 5th, 11:28:42
+                displayRef: 'Ultimo verde osservato (Orezzo): 5 Giugno, 11:28:42 (CEST)'
+            },
+            Gazzaniga: {
+                name: 'Gazzaniga',
+                referenceDateString: '2025-06-03T12:57:15', // June 3rd, 12:57:15
+                displayRef: 'Ultimo verde osservato (Gazzaniga): 3 Giugno, 12:57:15 (CEST)'
+            }
+        };
 
+        let currentSemaforo = 'Orezzo'; // Default selected semaforo
 
         const redLight = document.getElementById('redLight');
         const orangeLight = document.getElementById('orangeLight');
@@ -165,20 +240,41 @@
         const semaforoStatus = document.getElementById('semaforoStatus');
         const countdownDisplay = document.getElementById('countdown');
         const currentTimeDisplay = document.getElementById('currentTime');
+        const lastGreenObservedDisplay = document.getElementById('lastGreenObserved');
+
+        const btnOrezzo = document.getElementById('btnOrezzo');
+        const btnGazzaniga = document.getElementById('btnGazzaniga');
+
+        function setSemaforo(name) {
+            currentSemaforo = name;
+            btnOrezzo.classList.remove('active');
+            btnGazzaniga.classList.remove('active');
+            document.getElementById(`btn${name}`).classList.add('active');
+            updateSemaforo(); // Force an immediate update
+        }
+
+        btnOrezzo.addEventListener('click', () => setSemaforo('Orezzo'));
+        btnGazzaniga.addEventListener('click', () => setSemaforo('Gazzaniga'));
 
         function updateSemaforo() {
             const now = new Date();
-            currentTimeDisplay.textContent = `Current time: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            currentTimeDisplay.textContent = `Ora attuale: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
 
-            const timeSinceReference = (now.getTime() - REFERENCE_GREEN_START.getTime()) / 1000; // in seconds
+            const semaforoConfig = SEMAFORI_DATA[currentSemaforo];
+            const referenceGreenStart = new Date(semaforoConfig.referenceDateString);
+
+            // Set the footer text for the last observed green time
+            lastGreenObservedDisplay.textContent = semaforoConfig.displayRef;
+
+            const timeSinceReference = (now.getTime() - referenceGreenStart.getTime()) / 1000; // in seconds
 
             // Handle cases where the current time is before the reference time (e.g., if user changes clock)
             if (timeSinceReference < 0) {
                 // If before reference, assume it's red until the reference green time
                 setLights('red');
-                semaforoStatus.textContent = 'Waiting for cycle to start...';
+                semaforoStatus.textContent = `In attesa dell'avvio del ciclo per ${semaforoConfig.name}...`;
                 const timeToStart = Math.abs(timeSinceReference);
-                countdownDisplay.textContent = `Starts in: ${formatTime(timeToStart)}`;
+                countdownDisplay.textContent = `Inizia tra: ${formatTime(timeToStart)}`;
                 return;
             }
 
@@ -208,8 +304,8 @@
 
             setLights(currentPhase);
 
-            semaforoStatus.textContent = `Semaforo is ${currentPhase.toUpperCase()}`;
-            countdownDisplay.textContent = `Next change to ${nextPhase.toUpperCase()} in: ${formatTime(timeUntilNextPhase)}`;
+            semaforoStatus.textContent = `Semaforo ${semaforoConfig.name}: ${currentPhase.toUpperCase()}`;
+            countdownDisplay.textContent = `Prossimo cambio a ${nextPhase.toUpperCase()} tra: ${formatTime(timeUntilNextPhase)}`;
         }
 
         function setLights(color) {
@@ -232,11 +328,9 @@
             return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        // Initial update
-        updateSemaforo();
-
-        // Update every second
-        setInterval(updateSemaforo, 1000);
+        // Initial setup and update
+        setSemaforo(currentSemaforo); // Sets initial active button and updates state
+        setInterval(updateSemaforo, 1000); // Update every second
     </script>
 </body>
 </html>
