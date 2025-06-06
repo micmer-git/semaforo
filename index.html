@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Semafori Orezzo & Gazzaniga</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
@@ -33,6 +34,12 @@
             --toggle-active-bg: #007bff;
             --toggle-text-color: #555;
             --toggle-active-text-color: #ffffff;
+
+            /* Install Button */
+            --install-button-bg: #28a745; /* A pleasant green */
+            --install-button-hover-bg: #218838;
+            --install-button-text: #ffffff;
+            --install-button-border-radius: 8px;
         }
 
         body {
@@ -157,8 +164,29 @@
             color: #2c3e50;
         }
 
+        #install-button {
+            background-color: var(--install-button-bg);
+            color: var(--install-button-text);
+            border: none;
+            border-radius: var(--install-button-border-radius);
+            padding: 12px 25px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--box-shadow-light);
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            display: none; /* Hidden by default, shown by JS if installable */
+        }
+
+        #install-button:hover {
+            background-color: var(--install-button-hover-bg);
+            transform: translateY(-2px);
+        }
+
         #developer-info {
-            margin-top: 40px;
+            margin-top: 20px; /* Reduced margin since install button is above */
             font-size: 0.9em;
             color: #777;
             text-align: center;
@@ -217,6 +245,10 @@
             .time-display p {
                 font-size: 1.1em;
             }
+            #install-button {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
         }
 
         @media (max-width: 480px) {
@@ -243,6 +275,10 @@
             }
             .time-display p {
                 font-size: 1em;
+            }
+            #install-button {
+                padding: 8px 15px;
+                font-size: 0.9em;
             }
         }
     </style>
@@ -279,12 +315,14 @@
         </div>
     </div>
 
+    <button id="install-button">Installa App</button>
+
     <div id="reading-suggestion">
         Nell'attesa, suggeriamo di leggere qualcosa su <a href="https://fortissimo.substack.com/" target="_blank" rel="noopener noreferrer">fortissimo.substack.com</a>
     </div>
 
     <div id="developer-info">
-        Sviluppato da **Michele Marelli**
+        Sviluppato da <strong>Michele Marelli</strong>
     </div>
 
     <script>
@@ -322,6 +360,8 @@
 
         const orezzoToggleButton = document.getElementById('show-orezzo');
         const gazzanigaToggleButton = document.getElementById('show-gazzaniga');
+        const installButton = document.getElementById('install-button');
+        let deferredPrompt; // Variable to store the event
 
         let currentSemaforo = 'orezzo'; // Default to Orezzo
 
@@ -395,6 +435,54 @@
         // Event Listeners for toggle buttons
         orezzoToggleButton.addEventListener('click', () => showSemaforo('orezzo'));
         gazzanigaToggleButton.addEventListener('click', () => showSemaforo('gazzaniga'));
+
+        // --- PWA Installation Logic ---
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI to notify the user they can add to home screen
+            installButton.style.display = 'block';
+        });
+
+        installButton.addEventListener('click', async () => {
+            // Hide the install button
+            installButton.style.display = 'none';
+            // Show the install prompt
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                // We've used the prompt, and can't use it again, clear it
+                deferredPrompt = null;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the A2HS prompt');
+                } else {
+                    console.log('User dismissed the A2HS prompt');
+                }
+            }
+        });
+
+        // Detect when the app is installed from the prompt (or other means)
+        window.addEventListener('appinstalled', () => {
+            // Hide the install button
+            installButton.style.display = 'none';
+            console.log('PWA was installed!');
+        });
+
+        // --- Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered: ', registration);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed: ', error);
+                    });
+            });
+        }
 
         // Initial setup
         showSemaforo('orezzo'); // Show Orezzo by default
