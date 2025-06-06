@@ -327,32 +327,28 @@
 
     <script>
         // --- Fixed Durations (in milliseconds) ---
-        const greenDuration = 31 * 1000;
-        const orangeDuration = 5 * 1000;
+        const greenDurationMs = 31 * 1000;
+        const orangeDurationMs = 5 * 1000;
 
-        // --- Calculate Red Duration based on observed full cycles ---
-        // Gazzaniga observations used for precise cycle length calculation
-        const gazzanigaObs1 = new Date('2025-06-03T12:57:15+02:00').getTime(); // June 3, 12:57:15 CEST
-        const gazzanigaObs2 = new Date('2025-06-06T06:04:25+02:00').getTime(); // June 6, 06:04:25 CEST
+        // --- Calculate Total Cycle Duration based on precise Gazzaniga observations ---
+        const gazzanigaObs1Ms = new Date('2025-06-03T12:57:15+02:00').getTime(); 
+        const gazzanigaObs2Ms = new Date('2025-06-06T06:04:25+02:00').getTime(); 
 
-        const totalMsBetweenGazzanigaObs = gazzanigaObs2 - gazzanigaObs1;
-        const totalSecondsBetweenGazzanigaObs = totalMsBetweenGazzanigaObs / 1000;
-
-        // Assuming 600 full cycles based on previous analysis (294430 / 490.44 = ~600.33)
-        // If the observations are defining the cycle, we must assume a whole number of cycles.
-        // Let's use 600 cycles as derived from the input data.
-        const numberOfCycles = 600; 
-        const newTotalCycleDurationSeconds = totalSecondsBetweenGazzanigaObs / numberOfCycles;
+        const totalMsBetweenGazzanigaObs = gazzanigaObs2Ms - gazzanigaObs1Ms;
+        // Calculation: (2 days * 24 hrs/day * 3600 sec/hr) + (17 hrs * 3600 sec/hr) + (7 min * 60 sec/min) + 10 sec = 234430 seconds
+        // Based on 234430 seconds and approximately 490.44 sec/cycle, this gives 478 full cycles.
+        const numberOfCyclesBetweenGazzanigaObs = 478; 
         
-        const redDuration = (newTotalCycleDurationSeconds - (greenDuration / 1000) - (orangeDuration / 1000)) * 1000; // In milliseconds
-        const totalCycleDuration = greenDuration + orangeDuration + redDuration; // In milliseconds
+        const totalCycleDurationMs = totalMsBetweenGazzanigaObs / numberOfCyclesBetweenGazzanigaObs;
 
-        // --- Semaforo Reference Times (latest observations for each semaforo) ---
-        // Orezzo: 5th of June, 11.28.42
-        const orezzoRefGreenTime = new Date('2025-06-05T11:28:42+02:00').getTime(); 
+        const redDurationMs = totalCycleDurationMs - greenDurationMs - orangeDurationMs;
+
+        // --- Semaforo Reference Times (latest observed green for each semaforo) ---
+        // Orezzo: From your notes, this is the most recent Orezzo green light.
+        const orezzoRefGreenTimeMs = new Date('2025-06-05T11:28:42+02:00').getTime(); 
         
-        // Gazzaniga: 6th of June, 6:04:25
-        const gazzanigaRefGreenTime = new Date('2025-06-06T06:04:25+02:00').getTime();
+        // Gazzaniga: The latest precise observation for Gazzaniga.
+        const gazzanigaRefGreenTimeMs = new Date('2025-06-06T06:04:25+02:00').getTime();
 
         const orezzoElements = {
             container: document.getElementById('orezzo-display-area'),
@@ -396,7 +392,7 @@
 
             // Calculate the time within the current cycle
             // Use modulo to wrap around the total cycle duration
-            const timeInCurrentCycle = (elapsedTimeSinceRef % totalCycleDuration + totalCycleDuration) % totalCycleDuration;
+            const timeInCurrentCycle = (elapsedTimeSinceRef % totalCycleDurationMs + totalCycleDurationMs) % totalCycleDurationMs;
 
             let timeRemainingInPhase = 0;
 
@@ -405,18 +401,18 @@
             lightElements.orange.classList.remove('active', 'orange');
             lightElements.green.classList.remove('active', 'green');
 
-            if (timeInCurrentCycle < greenDuration) {
+            if (timeInCurrentCycle < greenDurationMs) {
                 // Green phase
                 lightElements.green.classList.add('active', 'green');
-                timeRemainingInPhase = greenDuration - timeInCurrentCycle;
-            } else if (timeInCurrentCycle < greenDuration + orangeDuration) {
+                timeRemainingInPhase = greenDurationMs - timeInCurrentCycle;
+            } else if (timeInCurrentCycle < greenDurationMs + orangeDurationMs) {
                 // Orange phase
                 lightElements.orange.classList.add('active', 'orange');
-                timeRemainingInPhase = (greenDuration + orangeDuration) - timeInCurrentCycle;
+                timeRemainingInPhase = (greenDurationMs + orangeDurationMs) - timeInCurrentCycle;
             } else {
                 // Red phase
                 lightElements.red.classList.add('active', 'red');
-                timeRemainingInPhase = totalCycleDuration - timeInCurrentCycle;
+                timeRemainingInPhase = totalCycleDurationMs - timeInCurrentCycle;
             }
 
             // Round to nearest second for display
@@ -425,9 +421,9 @@
 
         function updateTrafficLights() {
             if (currentSemaforo === 'orezzo') {
-                updateLight(orezzoElements, orezzoRefGreenTime);
+                updateLight(orezzoElements, orezzoRefGreenTimeMs);
             } else {
-                updateLight(gazzanigaElements, gazzanigaRefGreenTime);
+                updateLight(gazzanigaElements, gazzanigaRefGreenTimeMs);
             }
         }
 
