@@ -369,7 +369,6 @@
         function formatTimeSeconds(totalSeconds) {
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = Math.floor(totalSeconds % 60);
-            // Ensure seconds are always two digits, e.g., 05, 12
             return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
@@ -405,7 +404,6 @@
                 timeRemainingInPhase = totalCycleDuration - timeInCurrentCycle;
             }
 
-            // Round to nearest second for display
             lightElements.timeInPhase.textContent = formatTimeSeconds(Math.max(0, Math.round(timeRemainingInPhase / 1000)));
         }
 
@@ -429,7 +427,7 @@
                 orezzoElements.container.style.display = 'none';
                 gazzanigaElements.container.style.display = 'flex';
                 orezzoToggleButton.classList.remove('active');
-                orezzoToggleButton.classList.add('active'); // This line was a bug in previous version, fixed to gazzanigaToggleButton
+                gazzanigaToggleButton.classList.add('active');
             }
             updateTrafficLights(); // Force an update when switching
         }
@@ -445,8 +443,7 @@
             // Stash the event so it can be triggered later.
             deferredPrompt = e;
             // Update UI to notify the user they can add to home screen
-            // The browser will only fire this event if PWA criteria are met.
-            installButton.style.display = 'block'; // Show the button
+            installButton.style.display = 'block';
         });
 
         installButton.addEventListener('click', async () => {
@@ -469,7 +466,7 @@
 
         // Detect when the app is installed from the prompt (or other means)
         window.addEventListener('appinstalled', () => {
-            // Hide the install button if it was visible
+            // Hide the install button
             installButton.style.display = 'none';
             console.log('PWA was installed!');
         });
