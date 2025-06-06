@@ -1,130 +1,450 @@
-<!DOCTYPE html><html lang="it">
+<!DOCTYPE html>
+<html lang="it">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Semafori Live – Orezzo &amp; Gazzaniga</title>
-  <!-- TailwindCSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    body {
-      /* layout */
-      @apply bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white font-inter min-h-screen flex flex-col items-center pt-8 gap-6 overflow-hidden;
-    }
-    /* lampadine base */
-    .lamp { @apply h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-slate-700 transition-colors duration-300 shadow-inner; }
-    .on   { @apply shadow-2xl shadow-current; }/* Colorazioni ON */
-#red.on,   #redG.on   { background: radial-gradient(circle at center, #ff4d4d, #7f1d1d); }
-#orange.on,#orangeG.on{ background: radial-gradient(circle at center, #f59e0b, #78350f); }
-#green.on, #greenG.on { background: radial-gradient(circle at center, #22c55e, #065f46); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semafori Orezzo & Gazzaniga</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Orezzo (fixed) */
+            --orezzo-light-width: 150px;
+            --orezzo-light-height: 450px;
+            --orezzo-light-size: 100px;
+            --orezzo-spacing: 20px;
 
-  </style>
+            /* Gazzaniga (can be same or adjusted for visual distinction if needed, but per request, same cycle length) */
+            --gazzaniga-light-width: var(--orezzo-light-width);
+            --gazzaniga-light-height: var(--orezzo-light-height);
+            --gazzaniga-light-size: var(--orezzo-light-size);
+            --gazzaniga-spacing: var(--orezzo-spacing);
+
+
+            --off-color: #333;
+            --red-on: #ff0000;
+            --orange-on: #ffa500;
+            --green-on: #00ff00;
+            --background-gradient: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%);
+            --panel-background: #ffffff;
+            --text-color: #333;
+            --border-radius-large: 20px;
+            --border-radius-small: 50%;
+            --box-shadow-light: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --box-shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.2);
+            --slider-track-color: #e0e0e0;
+            --slider-thumb-color: #4CAF50;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: var(--background-gradient);
+            color: var(--text-color);
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #main-title {
+            font-size: 2.8em;
+            margin-bottom: 40px;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        #semafori-container {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            justify-content: space-around;
+            gap: 40px; /* Space between traffic lights */
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 900px; /* Limit overall width */
+        }
+
+        .semaforo-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0; /* Prevent shrinking */
+            width: fit-content;
+            margin: 0 auto; /* Center individual groups if wrapped */
+        }
+
+        .semaforo-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #34495e;
+            text-align: center;
+        }
+
+        .traffic-light-container {
+            background-color: #222;
+            border-radius: var(--border-radius-large);
+            padding: var(--spacing);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: var(--box-shadow-heavy);
+            border: 2px solid #444;
+        }
+
+        #orezzo-light-container {
+            width: var(--orezzo-light-width);
+            height: var(--orezzo-light-height);
+        }
+
+        #gazzaniga-light-container {
+            width: var(--gazzaniga-light-width);
+            height: var(--gazzaniga-light-height);
+        }
+
+        .light {
+            width: var(--light-size); /* General light size, specific ones set by container */
+            height: var(--light-size);
+            border-radius: var(--border-radius-small);
+            background-color: var(--off-color);
+            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            border: 2px solid #555;
+        }
+
+        /* Active light styles - fixed values for pure CSS */
+        .light.active.red {
+            background: radial-gradient(circle at center, #ff0000 0%, #cc0000 80%);
+            box-shadow: 0 0 20px #ff0000, inset 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .light.active.orange {
+            background: radial-gradient(circle at center, #ffa500 0%, #cc8400 80%);
+            box-shadow: 0 0 20px #ffa500, inset 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .light.active.green {
+            background: radial-gradient(circle at center, #00ff00 0%, #00cc00 80%);
+            box-shadow: 0 0 20px #00ff00, inset 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .time-display {
+            background-color: var(--panel-background);
+            border-radius: var(--border-radius-large);
+            padding: var(--spacing);
+            box-shadow: var(--box-shadow-light);
+            text-align: center;
+            width: 90%; /* Responsive width */
+            max-width: 300px; /* Max width for larger screens */
+            box-sizing: border-box;
+            border: 1px solid #e0e0e0;
+            margin-top: 20px;
+        }
+
+        .time-display p {
+            margin: 10px 0;
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+
+        .time-display span {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .slider-container {
+            width: 90%;
+            max-width: 300px;
+            margin-top: 20px;
+            text-align: center;
+            background-color: var(--panel-background);
+            border-radius: var(--border-radius-large);
+            padding: var(--spacing);
+            box-shadow: var(--box-shadow-light);
+            border: 1px solid #e0e0e0;
+        }
+
+        .slider-container label {
+            display: block;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #34495e;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none; /* Override default look */
+            appearance: none;
+            height: 10px;
+            background: var(--slider-track-color);
+            outline: none;
+            border-radius: 5px;
+            transition: opacity .2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--slider-thumb-color);
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background .15s ease-in-out;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--slider-thumb-color);
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background .15s ease-in-out;
+        }
+
+        input[type="range"]:hover::-webkit-slider-thumb {
+            background: darken(var(--slider-thumb-color), 10%);
+        }
+        input[type="range"]:hover::-moz-range-thumb {
+            background: darken(var(--slider-thumb-color), 10%);
+        }
+        
+        #offset-value {
+            margin-top: 10px;
+            font-weight: 700;
+            color: #555;
+        }
+
+        #developer-info {
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #777;
+            text-align: center;
+        }
+
+        #developer-info a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        #developer-info a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            #main-title {
+                font-size: 2.2em;
+                margin-bottom: 30px;
+            }
+            #semafori-container {
+                flex-direction: column; /* Stack vertically on small screens */
+                align-items: center;
+                gap: 50px;
+            }
+            .semaforo-title {
+                font-size: 1.8em;
+            }
+            .traffic-light-container {
+                width: var(--orezzo-light-width); /* Use orezzo size as base for both on mobile */
+                height: var(--orezzo-light-height);
+            }
+            .light {
+                width: var(--orezzo-light-size);
+                height: var(--orezzo-light-size);
+            }
+            .time-display, .slider-container {
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #main-title {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+            .semaforo-title {
+                font-size: 1.5em;
+            }
+            .traffic-light-container {
+                width: 100px;
+                height: 300px;
+                padding: 10px;
+            }
+            .light {
+                width: 70px;
+                height: 70px;
+            }
+            .time-display p {
+                font-size: 0.9em;
+            }
+            .slider-container label {
+                font-size: 1.1em;
+            }
+        }
+    </style>
 </head>
 <body>
-  <header class="text-center animate-fade-in-down">
-    <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight">Semafori in <span class="text-emerald-400">Val Seriana</span></h1>
-    <p class="text-sm text-slate-400 mt-2">Sincronizzati con <a href="https://time.is/Europe/Rome" target="_blank" class="underline decoration-dotted">time.is</a></p>
-  </header>  <!-- Slider di selezione -->  <div class="flex flex-col items-center gap-2 animate-fade-in-up">
-    <input id="semSlider" type="range" min="0" max="1" step="1" value="0" class="w-48 accent-emerald-500 cursor-pointer">
-    <div class="flex justify-between w-48 text-xs">
-      <span>Orezzo</span>
-      <span>Gazzaniga</span>
+    <h1 id="main-title">Semafori Orezzo & Gazzaniga</h1>
+
+    <div id="semafori-container">
+        <div class="semaforo-group">
+            <h2 class="semaforo-title">Semaforo Orezzo</h2>
+            <div id="orezzo-light-container" class="traffic-light-container">
+                <div id="orezzo-red-light" class="light"></div>
+                <div id="orezzo-orange-light" class="light"></div>
+                <div id="orezzo-green-light" class="light"></div>
+            </div>
+            <div class="time-display">
+                <p>Ora Attuale: <span id="orezzo-current-time"></span></p>
+                <p>Prossimo Cambio in: <span id="orezzo-time-in-phase"></span></p>
+                <p>Fase Attuale: <span id="orezzo-current-phase"></span></p>
+            </div>
+        </div>
+
+        <div class="semaforo-group">
+            <h2 class="semaforo-title">Semaforo Gazzaniga</h2>
+            <div id="gazzaniga-light-container" class="traffic-light-container">
+                <div id="gazzaniga-red-light" class="light"></div>
+                <div id="gazzaniga-orange-light" class="light"></div>
+                <div id="gazzaniga-green-light" class="light"></div>
+            </div>
+            <div class="time-display">
+                <p>Ora Attuale: <span id="gazzaniga-current-time"></span></p>
+                <p>Prossimo Cambio in: <span id="gazzaniga-time-in-phase"></span></p>
+                <p>Fase Attuale: <span id="gazzaniga-current-phase"></span></p>
+            </div>
+            <div class="slider-container">
+                <label for="gazzaniga-offset-slider">Regola Offset (secondi)</label>
+                <input type="range" id="gazzaniga-offset-slider" min="-3600" max="3600" value="0" step="1">
+                <p>Offset: <span id="offset-value">0 s</span></p>
+            </div>
+        </div>
     </div>
-  </div>  <!-- Semaforo Orezzo -->  <section id="trafficO" class="flex flex-col items-center gap-6 bg-slate-800/50 backdrop-blur-lg px-10 py-8 rounded-3xl shadow-xl ring-1 ring-white/10 animate-fade-in-up">
-    <p class="mb-2 font-semibold tracking-wide">Orezzo</p>
-    <div id="red"    class="lamp"></div>
-    <div id="orange" class="lamp"></div>
-    <div id="green"  class="lamp"></div>
-  </section>  <!-- Semaforo Gazzaniga -->  <section id="trafficG" class="hidden flex flex-col items-center gap-6 bg-slate-800/50 backdrop-blur-lg px-10 py-8 rounded-3xl shadow-xl ring-1 ring-white/10 animate-fade-in-up">
-    <p class="mb-2 font-semibold tracking-wide">Gazzaniga</p>
-    <div id="redG"    class="lamp"></div>
-    <div id="orangeG" class="lamp"></div>
-    <div id="greenG"  class="lamp"></div>
-  </section>  <!-- Orologio live -->  <div id="clock" class="font-mono text-4xl tracking-widest animate-fade-in-up"></div>  <!-- Footer -->  <footer class="mt-auto pb-6 text-xs opacity-60">
-    sviluppato da <a href="https://linktr.ee/micmer" target="_blank" class="underline">micmer</a>
-  </footer>  <script>
-    // ---------- CONFIGURAZIONE ----------
-    const GREEN_DURATION  = 31;   // secondi di verde
-    const ORANGE_DURATION = 5;    // secondi di arancione
-    const CYCLES_BETWEEN  = 118;  // cicli tra 2 verdi Orezzo
 
-    // Riferimenti di fase (Europe/Rome)
-    const O_REF1 = new Date('2025-06-04T19:24:10+02:00');
-    const O_REF2 = new Date('2025-06-05T11:28:42+02:00');
-    const G_REF  = new Date('2025-06-03T12:57:15+02:00');
+    <div id="developer-info">
+        Sviluppato da <a href="https://linktr.ee/micmer" target="_blank" rel="noopener noreferrer">MicMer</a>
+    </div>
 
-    // Calcoli lunghezza ciclo e rosso
-    const totalCycle   = (O_REF2 - O_REF1) / 1000 / CYCLES_BETWEEN;   // ≈ 490.45 s
-    const RED_DURATION = totalCycle - (GREEN_DURATION + ORANGE_DURATION); // ≈ 454.44 s
+    <script>
+        // Durations in milliseconds
+        const greenDuration = 31 * 1000;
+        const orangeDuration = 5 * 1000;
+        const redDuration = 454.44 * 1000;
+        const totalCycleDuration = greenDuration + orangeDuration + redDuration;
 
-    // Mapping lampade DOM
-    const lampsO = {
-      red:    document.getElementById('red'),
-      orange: document.getElementById('orange'),
-      green:  document.getElementById('green')
-    };
-    const lampsG = {
-      red:    document.getElementById('redG'),
-      orange: document.getElementById('orangeG'),
-      green:  document.getElementById('greenG')
-    };
+        // --- Orezzo Semaforo Data ---
+        // Observed green light start times (CEST)
+        const orezzoGreen1Obs = new Date('2025-06-04T19:24:10+02:00').getTime();
+        const orezzoGreen2Obs = new Date('2025-06-05T11:28:42+02:00').getTime();
+        const orezzoRefGreenTime = orezzoGreen2Obs; // Use the most recent observation as base
 
-    const trafficO = document.getElementById('trafficO');
-    const trafficG = document.getElementById('trafficG');
-    const slider   = document.getElementById('semSlider');
-    const clockEl  = document.getElementById('clock');
+        const orezzoElements = {
+            red: document.getElementById('orezzo-red-light'),
+            orange: document.getElementById('orezzo-orange-light'),
+            green: document.getElementById('orezzo-green-light'),
+            currentTime: document.getElementById('orezzo-current-time'),
+            timeInPhase: document.getElementById('orezzo-time-in-phase'),
+            currentPhase: document.getElementById('orezzo-current-phase')
+        };
 
-    // Sincronizzazione con worldtimeapi (stessa fonte di time.is)
-    let offsetMs = 0;
-    fetch('https://worldtimeapi.org/api/timezone/Europe/Rome')
-      .then(r => r.json())
-      .then(data => { offsetMs = new Date(data.datetime).getTime() - Date.now(); })
-      .catch(() => console.warn('Impossibile sincronizzare, uso orologio locale.'));
+        // --- Gazzaniga Semaforo Data ---
+        // Observed green light start time (CEST)
+        const gazzanigaBaseGreenTime = new Date('2025-06-03T12:57:15+02:00').getTime();
+        let gazzanigaOffset = 0; // Offset in milliseconds
 
-    function now() { return Date.now() + offsetMs; }
+        const gazzanigaElements = {
+            red: document.getElementById('gazzaniga-red-light'),
+            orange: document.getElementById('gazzaniga-orange-light'),
+            green: document.getElementById('gazzaniga-green-light'),
+            currentTime: document.getElementById('gazzaniga-current-time'),
+            timeInPhase: document.getElementById('gazzaniga-time-in-phase'),
+            currentPhase: document.getElementById('gazzaniga-current-phase')
+        };
 
-    function renderSemaforo(lamps, cyclePos) {
-      let phase;
-      if (cyclePos < GREEN_DURATION) phase = 'green';
-      else if (cyclePos < GREEN_DURATION + ORANGE_DURATION) phase = 'orange';
-      else phase = 'red';
+        const gazzanigaOffsetSlider = document.getElementById('gazzaniga-offset-slider');
+        const offsetValueDisplay = document.getElementById('offset-value');
 
-      for (const [key, el] of Object.entries(lamps)) {
-        if (key === phase) el.classList.add('on');
-        else el.classList.remove('on');
-      }
-    }
+        // Event listener for the slider
+        gazzanigaOffsetSlider.addEventListener('input', (event) => {
+            gazzanigaOffset = parseInt(event.target.value) * 1000; // Convert seconds to milliseconds
+            offsetValueDisplay.textContent = `${event.target.value} s`;
+            updateTrafficLights(); // Update immediately after slider change
+        });
 
-    function update() {
-      // Orezzo
-      const elapsedO  = (now() - O_REF1.getTime()) / 1000;
-      const cyclePosO = ((elapsedO % totalCycle) + totalCycle) % totalCycle;
-      renderSemaforo(lampsO, cyclePosO);
+        // --- Common Functions ---
+        function formatTime(totalSeconds) {
+            const sign = totalSeconds < 0 ? "-" : "";
+            totalSeconds = Math.abs(totalSeconds);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = Math.floor(totalSeconds % 60);
+            const milliseconds = Math.floor((totalSeconds - Math.floor(totalSeconds)) * 1000);
 
-      // Gazzaniga
-      const elapsedG  = (now() - G_REF.getTime()) / 1000;
-      const cyclePosG = ((elapsedG % totalCycle) + totalCycle) % totalCycle;
-      renderSemaforo(lampsG, cyclePosG);
+            let formatted = `${sign}${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            if (totalSeconds < 10) { // Show milliseconds for last 10 seconds
+                 formatted += `.${String(milliseconds).padStart(3, '0')}`;
+            } else if (totalSeconds < 60) { // Show one decimal place for last minute
+                formatted += `.${String(milliseconds).padStart(3, '0').substring(0, 1)}`;
+            }
+            return formatted;
+        }
 
-      // Orologio live
-      const d = new Date(now());
-      clockEl.textContent = d.toLocaleTimeString('it-IT', { hour12: false });
-    }
+        function updateLight(lightElements, refGreenTime) {
+            const now = new Date();
+            lightElements.currentTime.textContent = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
-    // Slider per cambio vista
-    slider.addEventListener('input', () => {
-      if (slider.value === '0') {
-        trafficO.classList.remove('hidden');
-        trafficG.classList.add('hidden');
-      } else {
-        trafficG.classList.remove('hidden');
-        trafficO.classList.add('hidden');
-      }
-    });
+            const elapsedTimeSinceRef = now.getTime() - refGreenTime;
+            const timeInCurrentCycle = (elapsedTimeSinceRef % totalCycleDuration + totalCycleDuration) % totalCycleDuration;
 
-    // Avvio loop
-    update();
-    setInterval(update, 100);
-  </script></body>
+            let currentPhase = '';
+            let timeRemainingInPhase = 0;
+
+            // Reset all lights
+            lightElements.red.classList.remove('active', 'red');
+            lightElements.orange.classList.remove('active', 'orange');
+            lightElements.green.classList.remove('active', 'green');
+
+            if (timeInCurrentCycle < greenDuration) {
+                // Green phase
+                lightElements.green.classList.add('active', 'green');
+                currentPhase = 'Verde';
+                timeRemainingInPhase = greenDuration - timeInCurrentCycle;
+            } else if (timeInCurrentCycle < greenDuration + orangeDuration) {
+                // Orange phase
+                lightElements.orange.classList.add('active', 'orange');
+                currentPhase = 'Arancione';
+                timeRemainingInPhase = (greenDuration + orangeDuration) - timeInCurrentCycle;
+            } else {
+                // Red phase
+                lightElements.red.classList.add('active', 'red');
+                currentPhase = 'Rosso';
+                timeRemainingInPhase = totalCycleDuration - timeInCurrentCycle;
+            }
+
+            lightElements.currentPhase.textContent = currentPhase;
+            lightElements.timeInPhase.textContent = formatTime(Math.max(0, timeRemainingInPhase / 1000));
+        }
+
+        function updateTrafficLights() {
+            updateLight(orezzoElements, orezzoRefGreenTime);
+            updateLight(gazzanigaElements, gazzanigaBaseGreenTime + gazzanigaOffset);
+        }
+
+        // Initial update
+        updateTrafficLights();
+
+        // Update every 100 milliseconds for smooth countdown
+        setInterval(updateTrafficLights, 100);
+    </script>
+</body>
 </html>
