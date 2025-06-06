@@ -330,25 +330,29 @@
         const greenDurationMs = 31 * 1000;
         const orangeDurationMs = 5 * 1000;
 
-        // --- Calculate Total Cycle Duration based on precise Gazzaniga observations ---
-        const gazzanigaObs1Ms = new Date('2025-06-03T12:57:15+02:00').getTime(); 
-        const gazzanigaObs2Ms = new Date('2025-06-06T06:04:25+02:00').getTime(); 
+        // --- Calculate Total Cycle Duration based on precise observations ---
+        // Using the longest span between any two green lights to derive the most stable cycle time.
+        // Earliest: Gazzaniga, June 3, 2025, 12:57:15 CEST
+        const earliestObsMs = new Date('2025-06-03T12:57:15+02:00').getTime(); 
+        // Latest: Orezzo, June 6, 2025, 16:54:21 CEST
+        const latestObsMs = new Date('2025-06-06T16:54:21+02:00').getTime(); 
 
-        const totalMsBetweenGazzanigaObs = gazzanigaObs2Ms - gazzanigaObs1Ms;
-        // Calculation: (2 days * 24 hrs/day * 3600 sec/hr) + (17 hrs * 3600 sec/hr) + (7 min * 60 sec/min) + 10 sec = 234430 seconds
-        // Based on 234430 seconds and approximately 490.44 sec/cycle, this gives 478 full cycles.
-        const numberOfCyclesBetweenGazzanigaObs = 478; 
+        const totalMsBetweenObservations = latestObsMs - earliestObsMs;
+        // Calculation: 295026 seconds between earliest Gazzaniga and latest Orezzo.
+        // To fix "anticipo" (timer running fast), we need a slightly longer cycle.
+        // 295026 seconds / 601 cycles = ~490.89 seconds/cycle (instead of 602 cycles which would be ~489.91)
+        const numberOfCyclesBetweenObservations = 601; 
         
-        const totalCycleDurationMs = totalMsBetweenGazzanigaObs / numberOfCyclesBetweenGazzanigaObs;
+        const totalCycleDurationMs = totalMsBetweenObservations / numberOfCyclesBetweenObservations;
 
         const redDurationMs = totalCycleDurationMs - greenDurationMs - orangeDurationMs;
 
-        // --- Semaforo Reference Times (latest observed green for each semaforo) ---
+        // --- Semaforo Reference Times (using the most recent green light for each) ---
         // Orezzo: From your notes, this is the most recent Orezzo green light.
-        const orezzoRefGreenTimeMs = new Date('2025-06-05T11:28:42+02:00').getTime(); 
+        const orezzoRefGreenTimeMs = new Date('2025-06-06T16:54:21+02:00').getTime(); 
         
         // Gazzaniga: The latest precise observation for Gazzaniga.
-        const gazzanigaRefGreenTimeMs = new Date('2025-06-06T06:04:25+02:00').getTime();
+        const gazzanigaRefGreenTimeMs = new Date('2025-06-06T06:04:30+02:00').getTime();
 
         const orezzoElements = {
             container: document.getElementById('orezzo-display-area'),
