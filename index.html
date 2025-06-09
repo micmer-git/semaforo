@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semafori Orezzo & Gazzaniga</title>
+    <title>Semafori Orezzo &amp; Gazzaniga</title>
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Common Traffic Light Sizes (maintaining Orezzo's original size) */
+            /* Common Traffic Light Sizes */
             --traffic-light-width: 150px;
             --traffic-light-height: 450px;
             --light-size: 100px;
@@ -21,265 +21,185 @@
             --red-on: #ff0000;
             --orange-on: #ffa500;
             --green-on: #00ff00;
-            --background-gradient: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%);
-            --panel-background: #ffffff;
-            --text-color: #333;
-            --border-radius-large: 20px;
-            --border-radius-small: 50%;
-            --box-shadow-light: 0 4px 8px rgba(0, 0, 0, 0.1);
-            --box-shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.2);
+            --background-gradient: linear-gradient(135deg,#f0f2f5 0%,#e0e5ec 100%);
+            --panel-background:#fff;
+            --text-color:#333;
+            --border-radius-large:20px;
+            --border-radius-small:50%;
+            --box-shadow-light:0 4px 8px rgba(0,0,0,.1);
+            --box-shadow-heavy:0 8px 16px rgba(0,0,0,.2);
 
             /* Toggle Colors */
-            --toggle-bg: #e0e0e0;
-            --toggle-active-bg: #007bff;
-            --toggle-text-color: #555;
-            --toggle-active-text-color: #ffffff;
+            --toggle-bg:#e0e0e0;
+            --toggle-active-bg:#007bff;
+            --toggle-text-color:#555;
+            --toggle-active-text-color:#fff;
 
             /* Install Button */
-            --install-button-bg: #28a745; /* A pleasant green */
-            --install-button-hover-bg: #218838;
-            --install-button-text: #ffffff;
-            --install-button-border-radius: 8px;
+            --install-button-bg:#28a745;
+            --install-button-hover-bg:#218838;
+            --install-button-text:#fff;
+            --install-button-border-radius:8px;
         }
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: var(--background-gradient);
-            color: var(--text-color);
-            overflow-x: hidden; /* Prevent horizontal scroll */
-            padding: 10px;
-            box-sizing: border-box;
+        /* ---------- layout / typography (unchanged) ---------- */
+        body{
+            font-family:'Roboto',sans-serif;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+            margin:0;
+            background:var(--background-gradient);
+            color:var(--text-color);
+            overflow-x:hidden;
+            padding:10px;
+            box-sizing:border-box;
         }
 
-        #main-title {
-            font-size: 2.8em;
-            margin-bottom: 20px;
-            color: #2c3e50;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
-            text-align: center;
+        #main-title{
+            font-size:2.8em;
+            margin-bottom:20px;
+            color:#2c3e50;
+            text-shadow:1px 1px 2px rgba(0,0,0,.05);
+            text-align:center;
         }
 
-        #semaforo-toggle {
-            display: flex;
-            background-color: var(--toggle-bg);
-            border-radius: 15px;
-            padding: 5px;
-            margin-bottom: 30px;
-            box-shadow: var(--box-shadow-light);
+        #semaforo-toggle{
+            display:flex;
+            background-color:var(--toggle-bg);
+            border-radius:15px;
+            padding:5px;
+            margin-bottom:30px;
+            box-shadow:var(--box-shadow-light);
         }
 
-        .toggle-button {
-            padding: 12px 25px;
-            font-size: 1.3em;
-            font-weight: 700;
-            color: var(--toggle-text-color);
-            background-color: transparent;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            flex-grow: 1; /* Distribute space evenly */
+        .toggle-button{
+            padding:12px 25px;
+            font-size:1.3em;
+            font-weight:700;
+            color:var(--toggle-text-color);
+            background-color:transparent;
+            border:none;
+            border-radius:12px;
+            cursor:pointer;
+            transition:all .3s ease;
+            text-align:center;
+            flex-grow:1;
         }
 
-        .toggle-button.active {
-            background-color: var(--toggle-active-bg);
-            color: var(--toggle-active-text-color);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        .toggle-button.active{
+            background-color:var(--toggle-active-bg);
+            color:var(--toggle-active-text-color);
+            box-shadow:0 2px 8px rgba(0,0,0,.2);
         }
 
-        .semaforo-display-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px; /* Space between light and info */
+        .semaforo-display-area{
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:20px;
         }
 
-        .traffic-light-container {
-            width: var(--traffic-light-width);
-            height: var(--traffic-light-height);
-            background-color: #222;
-            border-radius: var(--border-radius-large);
-            padding: var(--spacing);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: var(--box-shadow-heavy);
-            border: 2px solid #444;
+        .traffic-light-container{
+            width:var(--traffic-light-width);
+            height:var(--traffic-light-height);
+            background-color:#222;
+            border-radius:var(--border-radius-large);
+            padding:var(--spacing);
+            display:flex;
+            flex-direction:column;
+            justify-content:space-around;
+            align-items:center;
+            box-shadow:var(--box-shadow-heavy);
+            border:2px solid #444;
         }
 
-        .light {
-            width: var(--light-size);
-            height: var(--light-size);
-            border-radius: var(--border-radius-small);
-            background-color: var(--off-color);
-            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-            border: 2px solid #555;
+        .light{
+            width:var(--light-size);
+            height:var(--light-size);
+            border-radius:var(--border-radius-small);
+            background-color:var(--off-color);
+            transition:background-color .3s ease-in-out,box-shadow .3s ease-in-out;
+            box-shadow:inset 0 0 10px rgba(0,0,0,.5);
+            border:2px solid #555;
         }
 
-        /* Active light styles - fixed values for pure CSS */
-        .light.active.red {
-            background: radial-gradient(circle at center, #ff0000 0%, #cc0000 80%);
-            box-shadow: 0 0 20px #ff0000, inset 0 0 10px rgba(255, 255, 255, 0.5);
+        .light.active.red{
+            background:radial-gradient(circle at center,#ff0000 0%,#cc0000 80%);
+            box-shadow:0 0 20px #ff0000,inset 0 0 10px rgba(255,255,255,.5);
         }
 
-        .light.active.orange {
-            background: radial-gradient(circle at center, #ffa500 0%, #cc8400 80%);
-            box-shadow: 0 0 20px #ffa500, inset 0 0 10px rgba(255, 255, 255, 0.5);
+        .light.active.orange{
+            background:radial-gradient(circle at center,#ffa500 0%,#cc8400 80%);
+            box-shadow:0 0 20px #ffa500,inset 0 0 10px rgba(255,255,255,.5);
         }
 
-        .light.active.green {
-            background: radial-gradient(circle at center, #00ff00 0%, #00cc00 80%);
-            box-shadow: 0 0 20px #00ff00, inset 0 0 10px rgba(255, 255, 255, 0.5);
+        .light.active.green{
+            background:radial-gradient(circle at center,#00ff00 0%,#00cc00 80%);
+            box-shadow:0 0 20px #00ff00,inset 0 0 10px rgba(255,255,255,.5);
         }
 
-        .time-display {
-            background-color: var(--panel-background);
-            border-radius: var(--border-radius-large);
-            padding: var(--spacing);
-            box-shadow: var(--box-shadow-light);
-            text-align: center;
-            width: 90vw; /* Responsive width */
-            max-width: 300px; /* Max width for larger screens */
-            box-sizing: border-box;
-            border: 1px solid #e0e0e0;
+        .time-display{
+            background-color:var(--panel-background);
+            border-radius:var(--border-radius-large);
+            padding:var(--spacing);
+            box-shadow:var(--box-shadow-light);
+            text-align:center;
+            width:90vw;
+            max-width:300px;
+            box-sizing:border-box;
+            border:1px solid #e0e0e0;
         }
 
-        .time-display p {
-            margin: 8px 0;
-            font-size: 1.2em;
-            font-weight: 400;
+        .time-display p{margin:8px 0;font-size:1.2em;font-weight:400;}
+        .time-display span{font-weight:700;color:#2c3e50;}
+
+        #install-button{
+            background-color:var(--install-button-bg);
+            color:var(--install-button-text);
+            border:none;
+            border-radius:var(--install-button-border-radius);
+            padding:12px 25px;
+            font-size:1.1em;
+            font-weight:700;
+            cursor:pointer;
+            box-shadow:var(--box-shadow-light);
+            transition:background-color .3s ease,transform .1s ease;
+            margin-top:30px;
+            margin-bottom:20px;
+            display:none;
         }
 
-        .time-display span {
-            font-weight: 700;
-            color: #2c3e50;
-        }
+        #install-button:hover{background-color:var(--install-button-hover-bg);transform:translateY(-2px);}
 
-        #install-button {
-            background-color: var(--install-button-bg);
-            color: var(--install-button-text);
-            border: none;
-            border-radius: var(--install-button-border-radius);
-            padding: 12px 25px;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: var(--box-shadow-light);
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            margin-top: 30px;
-            margin-bottom: 20px;
-            display: none; /* Hidden by default, shown by JS if installable */
-        }
+        #developer-info{margin-top:20px;font-size:.9em;color:#777;text-align:center;}
+        #developer-info a{color:#007bff;text-decoration:none;font-weight:bold;}
+        #developer-info a:hover{text-decoration:underline;}
 
-        #install-button:hover {
-            background-color: var(--install-button-hover-bg);
-            transform: translateY(-2px);
-        }
+        #reading-suggestion{margin-top:20px;font-size:1em;color:#555;text-align:center;font-style:italic;}
+        #reading-suggestion a{color:#28a745;text-decoration:none;font-weight:bold;}
+        #reading-suggestion a:hover{text-decoration:underline;}
 
-        #developer-info {
-            margin-top: 20px; /* Reduced margin since install button is above */
-            font-size: 0.9em;
-            color: #777;
-            text-align: center;
+        /* responsive tweaks (unchanged) */
+        @media (max-width:768px){
+            #main-title{font-size:2.2em;margin-bottom:20px;}
+            .toggle-button{padding:10px 20px;font-size:1em;}
+            .traffic-light-container{width:120px;height:360px;padding:15px;}
+            .light{width:80px;height:80px;}
+            .time-display{max-width:280px;}
+            .time-display p{font-size:1.1em;}
+            #install-button{padding:10px 20px;font-size:1em;}
         }
-
-        #developer-info a {
-            color: #007bff;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        #developer-info a:hover {
-            text-decoration: underline;
-        }
-
-        #reading-suggestion {
-            margin-top: 20px;
-            font-size: 1em;
-            color: #555;
-            text-align: center;
-            font-style: italic;
-        }
-
-        #reading-suggestion a {
-            color: #28a745; /* Green link for the blog */
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        #reading-suggestion a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            #main-title {
-                font-size: 2.2em;
-                margin-bottom: 20px;
-            }
-            .toggle-button {
-                padding: 10px 20px;
-                font-size: 1em;
-            }
-            .traffic-light-container {
-                width: 120px;
-                height: 360px;
-                padding: 15px;
-            }
-            .light {
-                width: 80px;
-                height: 80px;
-            }
-            .time-display {
-                max-width: 280px;
-            }
-            .time-display p {
-                font-size: 1.1em;
-            }
-            #install-button {
-                padding: 10px 20px;
-                font-size: 1em;
-            }
-        }
-
-        @media (max-width: 480px) {
-            #main-title {
-                font-size: 1.8em;
-                margin-bottom: 20px;
-            }
-            .toggle-button {
-                padding: 8px 15px;
-                font-size: 0.9em;
-            }
-            .traffic-light-container {
-                width: 100px;
-                height: 300px;
-                padding: 10px;
-            }
-            .light {
-                width: 70px;
-                height: 70px;
-            }
-            .time-display {
-                max-width: 250px;
-                padding: 15px;
-            }
-            .time-display p {
-                font-size: 1em;
-            }
-            #install-button {
-                padding: 8px 15px;
-                font-size: 0.9em;
-            }
+        @media (max-width:480px){
+            #main-title{font-size:1.8em;margin-bottom:20px;}
+            .toggle-button{padding:8px 15px;font-size:.9em;}
+            .traffic-light-container{width:100px;height:300px;padding:10px;}
+            .light{width:70px;height:70px;}
+            .time-display{max-width:250px;padding:15px;}
+            .time-display p{font-size:1em;}
+            #install-button{padding:8px 15px;font-size:.9em;}
         }
     </style>
 </head>
@@ -287,15 +207,15 @@
     <h1 id="main-title">Controllo Semafori</h1>
 
     <div id="semaforo-toggle">
-        <button id="show-orezzo" class="toggle-button active">Orezzo</button>
+        <button id="show-orezzo"   class="toggle-button active">Orezzo</button>
         <button id="show-gazzaniga" class="toggle-button">Gazzaniga</button>
     </div>
 
     <div id="orezzo-display-area" class="semaforo-display-area">
         <div id="orezzo-light-container" class="traffic-light-container">
-            <div id="orezzo-red-light" class="light"></div>
+            <div id="orezzo-red-light"    class="light"></div>
             <div id="orezzo-orange-light" class="light"></div>
-            <div id="orezzo-green-light" class="light"></div>
+            <div id="orezzo-green-light"  class="light"></div>
         </div>
         <div class="time-display">
             <p>Ora Attuale: <span id="orezzo-current-time"></span></p>
@@ -303,11 +223,11 @@
         </div>
     </div>
 
-    <div id="gazzaniga-display-area" class="semaforo-display-area" style="display: none;">
+    <div id="gazzaniga-display-area" class="semaforo-display-area" style="display:none;">
         <div id="gazzaniga-light-container" class="traffic-light-container">
-            <div id="gazzaniga-red-light" class="light"></div>
+            <div id="gazzaniga-red-light"    class="light"></div>
             <div id="gazzaniga-orange-light" class="light"></div>
-            <div id="gazzaniga-green-light" class="light"></div>
+            <div id="gazzaniga-green-light"  class="light"></div>
         </div>
         <div class="time-display">
             <p>Ora Attuale: <span id="gazzaniga-current-time"></span></p>
@@ -318,213 +238,182 @@
     <button id="install-button">Installa App</button>
 
     <div id="reading-suggestion">
-        Nell'attesa, leggi qualcosa di <a href="https://fortissimo.substack.com/" target="_blank" rel="noopener noreferrer">fortissimo</a> 
-        oppure ordina una pizza alla <a href="https://g.co/kgs/Q1fgVDZ" target="_blank" rel="noopener noreferrer">Penzana</a> 😉
+        Nell'attesa, leggi qualcosa di
+        <a href="https://fortissimo.substack.com/" target="_blank" rel="noopener noreferrer">fortissimo</a>
+        oppure ordina una pizza alla
+        <a href="https://g.co/kgs/Q1fgVDZ" target="_blank" rel="noopener noreferrer">Penzana</a> 😉
     </div>
 
     <div id="developer-info">
         Un'idea di <strong>Alessandro Merelli</strong> sviluppata da <strong>Michele Merelli</strong>
     </div>
 
-    <div id="custom-install-modal" style="display:none; position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.2); padding:20px 30px; z-index:1000; text-align:center;">
+    <div id="custom-install-modal" style="display:none;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.2);padding:20px 30px;z-index:1000;text-align:center;">
         <span>Installa questa app per un accesso più veloce!</span>
-        <button id="custom-install-btn" style="margin-left:20px; background:#28a745; color:#fff; border:none; border-radius:8px; padding:8px 18px; font-weight:700; cursor:pointer;">Installa</button>
-        <button id="custom-install-close" style="margin-left:10px; background:transparent; color:#888; border:none; font-size:1.2em; cursor:pointer;">&times;</button>
+        <button id="custom-install-btn"   style="margin-left:20px;background:#28a745;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-weight:700;cursor:pointer;">Installa</button>
+        <button id="custom-install-close" style="margin-left:10px;background:transparent;color:#888;border:none;font-size:1.2em;cursor:pointer;">&times;</button>
     </div>
 
     <script>
-        // Durations in milliseconds
-        const greenDuration = 31 * 1000;
-        const orangeDuration = 5 * 1000;
-        const redDuration = 454.45 * 1000;
+        /* ---------- cycle durations (unchanged) ---------- */
+        const greenDuration   = 31  * 1000;
+        const orangeDuration  = 5   * 1000;
+        const redDuration     = 454.45 * 1000;
         const totalCycleDuration = greenDuration + orangeDuration + redDuration;
 
-        // --- Orezzo Semaforo Data ---
-        // Latest observed green light start time (CEST)
-        // This is based on a real-world observation and is the anchor for the cycle.
-        const orezzoRefGreenTime = new Date('2025-06-05T11:28:42+02:00').getTime();
+        /* ---------- reference start times (unchanged) ---------- */
+        const orezzoRefGreenTime    = new Date('2025-06-05T11:28:42+02:00').getTime();
+        const gazzanigaRefGreenTime = new Date('2025-06-03T12:57:15+02:00').getTime();
 
+        /* ---------- DOM handles ---------- */
         const orezzoElements = {
-            container: document.getElementById('orezzo-display-area'),
-            red: document.getElementById('orezzo-red-light'),
-            orange: document.getElementById('orezzo-orange-light'),
-            green: document.getElementById('orezzo-green-light'),
+            container:   document.getElementById('orezzo-display-area'),
+            red:         document.getElementById('orezzo-red-light'),
+            orange:      document.getElementById('orezzo-orange-light'),
+            green:       document.getElementById('orezzo-green-light'),
             currentTime: document.getElementById('orezzo-current-time'),
             timeInPhase: document.getElementById('orezzo-time-in-phase'),
         };
-
-        // --- Gazzaniga Semaforo Data ---
-        // Observed green light start time (CEST)
-        // This is based on a real-world observation and is the anchor for the cycle.
-        const gazzanigaRefGreenTime = new Date('2025-06-03T12:57:15+02:00').getTime();
-
         const gazzanigaElements = {
-            container: document.getElementById('gazzaniga-display-area'),
-            red: document.getElementById('gazzaniga-red-light'),
-            orange: document.getElementById('gazzaniga-orange-light'),
-            green: document.getElementById('gazzaniga-green-light'),
+            container:   document.getElementById('gazzaniga-display-area'),
+            red:         document.getElementById('gazzaniga-red-light'),
+            orange:      document.getElementById('gazzaniga-orange-light'),
+            green:       document.getElementById('gazzaniga-green-light'),
             currentTime: document.getElementById('gazzaniga-current-time'),
             timeInPhase: document.getElementById('gazzaniga-time-in-phase'),
         };
 
-        const orezzoToggleButton = document.getElementById('show-orezzo');
-        const gazzanigaToggleButton = document.getElementById('show-gazzaniga');
-        const installButton = document.getElementById('install-button');
-        let deferredPrompt; // Variable to store the event
+        const orezzoToggleButton   = document.getElementById('show-orezzo');
+        const gazzanigaToggleButton= document.getElementById('show-gazzaniga');
+        const installButton        = document.getElementById('install-button');
+        let deferredPrompt;
+        let currentSemaforo = 'orezzo';
 
-        let currentSemaforo = 'orezzo'; // Default to Orezzo
+        /* ---------- GLOBAL CLOCK (Europe/Rome) ---------- */
+        let globalTimeOffset = 0;   // ms difference between authoritative time and Date.now()
 
-        // Function to fetch and display the current time from time.is
-        // This function makes an asynchronous request to time.is to get the current time.
-        async function fetchTimeIsTime() {
+        async function initGlobalTime() {
             try {
-                // Using a proxy to bypass CORS restrictions for direct access to time.is
-                // In a real production environment, you might use your own backend as a proxy
-                // or ensure time.is has CORS headers configured for your domain.
-                const response = await fetch('https://api.allorigins.win/raw?url=https://time.is/UTC');
-                const text = await response.text();
-                // The time.is page returns a string like "2025-06-06 17:31:21 UTC"
-                // We need to parse this string to get a Date object.
-                const timeString = text.split('<div id="time_section">')[1].split('<br>')[0].trim();
-                const now = new Date(timeString + ' UTC'); // Parse as UTC
-
-                // Adjust to CEST (UTC+2) for consistent display in Italy
-                const offsetCEST = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
-                return new Date(now.getTime() + offsetCEST);
-
-            } catch (error) {
-                console.error('Error fetching time from time.is:', error);
-                // Fallback to local device time if time.is fetch fails
-                return new Date();
+                const res  = await fetch('https://worldtimeapi.org/api/timezone/Europe/Rome');
+                const data = await res.json(); // has .datetime in ISO-8601 with correct DST
+                globalTimeOffset = new Date(data.datetime).getTime() - Date.now();
+            } catch (err) {
+                console.error('Global time fetch failed, using device clock', err);
+                globalTimeOffset = 0; // fallback
             }
         }
-
-        // --- Common Functions ---
-        function formatTimeSeconds(totalSeconds) {
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = Math.floor(totalSeconds % 60);
-            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        function getGlobalNow() {
+            return new Date(Date.now() + globalTimeOffset);
         }
 
-        async function updateLight(lightElements, refGreenTime) {
-            const now = await fetchTimeIsTime(); // Use time from time.is
+        /* ---------- utils ---------- */
+        function formatTimeSeconds(totalSeconds){
+            const minutes = Math.floor(totalSeconds/60);
+            const seconds = Math.floor(totalSeconds%60);
+            return `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+        }
 
-            lightElements.currentTime.textContent = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        /* ---------- main update ---------- */
+        function updateLight(lightElements, refGreenTime){
+            const now = getGlobalNow(); // authoritative Europe/Rome time
 
-            // Calculate elapsed time from the reference green light start
+            lightElements.currentTime.textContent = now.toLocaleTimeString('it-IT',{
+                hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:'Europe/Rome'
+            });
+
+            /* elapsed vs reference */
             const elapsedTimeSinceRef = now.getTime() - refGreenTime;
-
-            // Calculate the time within the current cycle
-            // Use modulo to wrap around the total cycle duration
-            const timeInCurrentCycle = (elapsedTimeSinceRef % totalCycleDuration + totalCycleDuration) % totalCycleDuration;
+            const timeInCurrentCycle  = (elapsedTimeSinceRef % totalCycleDuration + totalCycleDuration) % totalCycleDuration;
 
             let timeRemainingInPhase = 0;
+            /* reset */
+            lightElements.red.classList.remove('active','red');
+            lightElements.orange.classList.remove('active','orange');
+            lightElements.green.classList.remove('active','green');
 
-            // Reset all lights
-            lightElements.red.classList.remove('active', 'red');
-            lightElements.orange.classList.remove('active', 'orange');
-            lightElements.green.classList.remove('active', 'green');
-
-            if (timeInCurrentCycle < greenDuration) {
-                // Green phase
-                lightElements.green.classList.add('active', 'green');
+            if(timeInCurrentCycle < greenDuration){
+                /* green */
+                lightElements.green.classList.add('active','green');
                 timeRemainingInPhase = greenDuration - timeInCurrentCycle;
-            } else if (timeInCurrentCycle < greenDuration + orangeDuration) {
-                // Orange phase
-                lightElements.orange.classList.add('active', 'orange');
-                timeRemainingInPhase = (greenDuration + orangeDuration) - timeInCurrentCycle;
+            } else if(timeInCurrentCycle < greenDuration+orangeDuration){
+                /* orange */
+                lightElements.orange.classList.add('active','orange');
+                timeRemainingInPhase = (greenDuration+orangeDuration) - timeInCurrentCycle;
             } else {
-                // Red phase
-                lightElements.red.classList.add('active', 'red');
+                /* red */
+                lightElements.red.classList.add('active','red');
                 timeRemainingInPhase = totalCycleDuration - timeInCurrentCycle;
             }
-
-            lightElements.timeInPhase.textContent = formatTimeSeconds(Math.max(0, Math.round(timeRemainingInPhase / 1000)));
+            lightElements.timeInPhase.textContent = formatTimeSeconds(Math.max(0,Math.round(timeRemainingInPhase/1000)));
         }
 
-        function updateTrafficLights() {
-            if (currentSemaforo === 'orezzo') {
+        function updateTrafficLights(){
+            if(currentSemaforo==='orezzo'){
                 updateLight(orezzoElements, orezzoRefGreenTime);
-            } else {
+            }else{
                 updateLight(gazzanigaElements, gazzanigaRefGreenTime);
             }
         }
 
-        function showSemaforo(semaforo) {
+        /* ---------- UI switching ---------- */
+        function showSemaforo(semaforo){
             currentSemaforo = semaforo;
-
-            if (semaforo === 'orezzo') {
-                orezzoElements.container.style.display = 'flex';
-                gazzanigaElements.container.style.display = 'none';
+            if(semaforo==='orezzo'){
+                orezzoElements.container.style.display='flex';
+                gazzanigaElements.container.style.display='none';
                 orezzoToggleButton.classList.add('active');
                 gazzanigaToggleButton.classList.remove('active');
-            } else {
-                orezzoElements.container.style.display = 'none';
-                gazzanigaElements.container.style.display = 'flex';
+            }else{
+                orezzoElements.container.style.display='none';
+                gazzanigaElements.container.style.display='flex';
                 orezzoToggleButton.classList.remove('active');
                 gazzanigaToggleButton.classList.add('active');
             }
-            updateTrafficLights(); // Force an update when switching
+            updateTrafficLights(); // immediate update
         }
+        orezzoToggleButton.addEventListener('click',()=>showSemaforo('orezzo'));
+        gazzanigaToggleButton.addEventListener('click',()=>showSemaforo('gazzaniga'));
 
-        // Event Listeners for toggle buttons
-        orezzoToggleButton.addEventListener('click', () => showSemaforo('orezzo'));
-        gazzanigaToggleButton.addEventListener('click', () => showSemaforo('gazzaniga'));
-
-        // --- PWA Installation Logic ---
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent the mini-infobar from appearing on mobile
+        /* ---------- PWA install (unchanged) ---------- */
+        window.addEventListener('beforeinstallprompt',(e)=>{
             e.preventDefault();
-            // Stash the event so it can be triggered later.
             deferredPrompt = e;
-            // Update UI to notify the user they can add to home screen
-            installButton.style.display = 'block';
-            // Show custom modal
-            const customInstallModal = document.getElementById('custom-install-modal');
-            customInstallModal.style.display = 'block';
+            installButton.style.display='block';
+            document.getElementById('custom-install-modal').style.display='block';
         });
-
-        const customInstallBtn = document.getElementById('custom-install-btn');
+        const customInstallBtn   = document.getElementById('custom-install-btn');
         const customInstallClose = document.getElementById('custom-install-close');
-
-        customInstallBtn.addEventListener('click', async () => {
-            customInstallModal.style.display = 'none';
-            if (deferredPrompt) {
+        customInstallBtn.addEventListener('click',async()=>{
+            document.getElementById('custom-install-modal').style.display='none';
+            if(deferredPrompt){
                 deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
+                await deferredPrompt.userChoice;
+                deferredPrompt=null;
             }
         });
-
-        customInstallClose.addEventListener('click', () => {
-            customInstallModal.style.display = 'none';
+        customInstallClose.addEventListener('click',()=>{
+            document.getElementById('custom-install-modal').style.display='none';
+        });
+        window.addEventListener('appinstalled',()=>{
+            installButton.style.display='none';
+            console.log('PWA installed!');
         });
 
-        // Detect when the app is installed from the prompt (or other means)
-        window.addEventListener('appinstalled', () => {
-            // Hide the install button
-            installButton.style.display = 'none';
-            console.log('PWA was installed!');
-        });
-
-        // --- Service Worker Registration ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+        /* ---------- service worker (unchanged) ---------- */
+        if('serviceWorker' in navigator){
+            window.addEventListener('load',()=>{
                 navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                        console.log('Service Worker registered: ', registration);
-                    })
-                    .catch((error) => {
-                        console.log('Service Worker registration failed: ', error);
-                    });
+                    .then(reg=>console.log('SW registered:',reg))
+                    .catch(err=>console.log('SW registration failed:',err));
             });
         }
 
-        // Initial setup
-        showSemaforo('orezzo'); // Show Orezzo by default
-
-        // Update every 100 milliseconds for smooth countdown
-        setInterval(updateTrafficLights, 100);
+        /* ---------- bootstrap ---------- */
+        (async()=>{
+            await initGlobalTime();      // get authoritative offset once
+            showSemaforo('orezzo');      // default display
+            setInterval(updateTrafficLights,100); // smooth 100-ms refresh
+        })();
     </script>
 </body>
 </html>
