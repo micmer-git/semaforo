@@ -220,13 +220,6 @@
             text-decoration: underline;
         }
 
-        #visit-count {
-            margin-top: 15px;
-            font-size: 0.9em;
-            color: #666;
-            text-align: center;
-        }
-
         /* Responsive adjustments */
         @media (max-width: 768px) {
             #main-title {
@@ -330,11 +323,7 @@
     </div>
 
     <div id="developer-info">
-        Da un'idea di Alessandro Merelli, sviluppata da <a href="https://linktr.ee/micmer" target="_blank" rel="noopener noreferrer"><strong>Michele Merelli</strong></a>
-    </div>
-
-    <div id="visit-count">
-        Numero di visite: <span id="counter">0</span>
+        Un'idea di <strong>Alessandro Merelli</strong> sviluppata da <strong>Michele Merelli</strong>
     </div>
 
     <div id="custom-install-modal" style="display:none; position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.2); padding:20px 30px; z-index:1000; text-align:center;">
@@ -518,37 +507,24 @@
             console.log('PWA was installed!');
         });
 
-        // --- Visit Counter Logic ---
-        async function updateVisitCount() {
-            try {
-                const response = await fetch('https://api.countapi.xyz/hit/semaforo.app/visits');
-                const data = await response.json();
-                document.getElementById('counter').textContent = data.value;
-            } catch (error) {
-                console.error('Error updating visit count:', error);
-                // Fallback to localStorage in case of network issues
-                let visits = localStorage.getItem('visitCount');
-                if (visits) {
-                    visits = parseInt(visits) + 1;
-                } else {
-                    visits = 1;
-                }
-                localStorage.setItem('visitCount', visits);
-                document.getElementById('counter').textContent = visits;
-            }
+        // --- Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered: ', registration);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed: ', error);
+                    });
+            });
         }
 
         // Initial setup
-        document.addEventListener('DOMContentLoaded', () => {
-            updateTrafficLights();
-            setInterval(updateTrafficLights, 1000); // Update every second
-            updateVisitCount(); // Increment and display visit count on load
+        showSemaforo('orezzo'); // Show Orezzo by default
 
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js')
-                    .catch(err => console.error('SW registration failed:', err));
-            }
-        });
+        // Update every 100 milliseconds for smooth countdown
+        setInterval(updateTrafficLights, 100);
     </script>
 </body>
 </html>
