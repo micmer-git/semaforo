@@ -519,15 +519,23 @@
         });
 
         // --- Visit Counter Logic ---
-        function updateVisitCount() {
-            let visits = localStorage.getItem('visitCount');
-            if (visits) {
-                visits = parseInt(visits) + 1;
-            } else {
-                visits = 1;
+        async function updateVisitCount() {
+            try {
+                const response = await fetch('https://api.countapi.xyz/hit/semaforo.app/visits');
+                const data = await response.json();
+                document.getElementById('counter').textContent = data.value;
+            } catch (error) {
+                console.error('Error updating visit count:', error);
+                // Fallback to localStorage in case of network issues
+                let visits = localStorage.getItem('visitCount');
+                if (visits) {
+                    visits = parseInt(visits) + 1;
+                } else {
+                    visits = 1;
+                }
+                localStorage.setItem('visitCount', visits);
+                document.getElementById('counter').textContent = visits;
             }
-            localStorage.setItem('visitCount', visits);
-            document.getElementById('counter').textContent = visits;
         }
 
         // Initial setup
@@ -535,6 +543,11 @@
             updateTrafficLights();
             setInterval(updateTrafficLights, 1000); // Update every second
             updateVisitCount(); // Increment and display visit count on load
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .catch(err => console.error('SW registration failed:', err));
+            }
         });
     </script>
 </body>
