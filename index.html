@@ -50,10 +50,6 @@
         #reading-suggestion a{color:#28a745;text-decoration:none;font-weight:bold}
         #reading-suggestion a:hover{text-decoration:underline}
 
-        /* ----- nuova CARD citazione ----- */
-        .quote-card{background:#fff;border-radius:var(--border-radius-large);box-shadow:var(--box-shadow-light);padding:20px;max-width:320px;cursor:pointer;text-align:center;margin-top:35px;transition:transform .2s}
-        .quote-card:hover{transform:translateY(-3px)}
-        .quote-card span{font-weight:500;font-style:italic;color:#444}
 
         /* ----- responsivo (esistenti) ----- */
         @media (max-width:768px){
@@ -94,6 +90,7 @@
             <p>Ora attuale: <span id="orezzo-current-time"></span></p>
             <p>Prossimo cambio tra: <span id="orezzo-time-in-phase"></span></p>
         </div>
+        <button id="email-button">Scrivi in Provincia</button>
     </div>
 
     <!-- ----- Semaforo Gazzaniga ----- -->
@@ -109,10 +106,6 @@
         </div>
     </div>
 
-    <!-- ----- Scheda citazione casuale ----- -->
-    <div id="random-quote-card" class="quote-card">
-        <span id="quote-card-text">Scopri una citazione sul semaforo</span>
-    </div>
 
 
     <button id="install-button">Installa App</button>
@@ -121,12 +114,9 @@
         Nell'attesa, leggi qualcosa di <a href="https://fortissimo.substack.com/" target="_blank" rel="noopener noreferrer">fortissimo</a>
         oppure ordina una pizza alla <a href="https://g.co/kgs/Q1fgVDZ" target="_blank" rel="noopener noreferrer">Penzana</a> 😉
     </div>
-
-    <div id="developer-info">
-        Un'idea di <strong>Alessandro Merelli</strong> sviluppata da <strong>Michele Merelli</strong>
+    <div id='developer-info'>
+        Un'idea di <strong>Alessandro Merelli</strong> sviluppata da <strong><a href='https://linktr.ee/micmer' target='_blank' rel='noopener noreferrer'>Michele Merelli</a></strong>
     </div>
-
-    <button id="email-button">Segnala via email</button>
 
     <!-- ----- Modale installazione PWA ----- -->
     <div id="custom-install-modal" style="display:none;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.2);padding:20px 30px;z-index:1000;text-align:center">
@@ -224,41 +214,6 @@
         orezzoToggleButton   .addEventListener('click',()=>showSemaforo('orezzo'));
         gazzanigaToggleButton.addEventListener('click',()=>showSemaforo('gazzaniga'));
 
-        /* ---------- Elenco citazioni ---------- */
-        const quotes = [
-            {quote:`«Il disco giallo si illuminò… Ormai i pedoni sono passati, ma il segnale di via libera per le macchine tarderà ancora alcuni secondi»`,source:`José Saramago, “Cecità” (1995)`,context:`Incipit: un automobilista diventa cieco mentre aspetta il verde. Le luci che cambiano annunciano il collasso dell’ordine quotidiano.`},
-            {quote:`«Tutte le sue luci, ad un tratto, si tinsero di blu, e la gente non sapeva più come regolarsi.»`,source:`Gianni Rodari, “Il semaforo blu” (1962)`,context:`Favola: il semaforo blu offre un “via libera per il cielo”, invito al coraggio di immaginare.`},
-            {quote:`«Il semaforo segnava giallo, giallo, giallo, continuando ad accendersi e riaccendersi.»`,source:`Italo Calvino, “Marcovaldo” (1963)`,context:`Nebbia in città: il giallo infinito diventa simbolo della monotonia urbana da cui Marcovaldo evade con la fantasia.`},
-            {quote:`«Cuando vio que la mujer se lanzaba a la calzada a pesar de las luces verdes, ya era tarde…»`,source:`Julio Cortázar, “La noche boca arriba” (1956)`,context:`Incidente al semaforo: il verde diventa tragedia e spartiacque fra realtà e incubo.`},
-            {quote:`«In piedi dietro al figlio, aspettando il verde, ricordò un tempo in cui aveva provato una solitudine profonda…»`,source:`Elizabeth Strout, “Olive Kitteridge” (2008)`,context:`L’attesa della luce verde è occasione di introspezione e ricordo.`},
-            {quote:`«A red traffic light loomed, and Cecilia slammed her foot on the brake.»`,source:`Liane Moriarty, “The Husband’s Secret” (2013)`,context:`Il rosso obbliga Cecilia a fermarsi e a rivalutare le proprie priorità.`},
-            {quote:`«Un uomo è in macchina, aspetta che scatti il verde… Il fatto è che il semaforo è verde già da un pezzo.»`,source:`Michael Frayn, “Sweet Dreams” (1973)`,context:`Satira: attesa paradossale che rivela indecisione esistenziale.`},
-            {quote:`«Anche i semafori hanno un umore. Certe mattine alcuni rossi sembrano durare più a lungo.»`,source:`Fabrizio Caramagna, aforisma (2022)`,context:`Personificazione del semaforo: il rosso lungo mette alla prova la nostra pazienza.`},
-            {quote:`«Il Secondo di New York è l’intervallo tra il verde e il clacson del taxi dietro di te.»`,source:`Terry Pratchett, “Streghe all’estero” (1992)`,context:`Umorismo: nelle metropoli l’attesa è ridotta al minimo.`},
-            {quote:`«Fermo al semaforo in attesa di trovare un titolo, vidi passare la donna più bella…»`,source:`Andrew Faber, titolo raccolta (2018)`,context:`Il rosso diventa scintilla d’ispirazione improvvisa.`},
-            {quote:`«Quando il semaforo diventa verde, il pickup non parte: è l’invito di lui a lasciare tutto…»`,source:`Robert J. Waller, “I ponti di Madison County” (1992)`,context:`Il verde sospeso segna un bivio di vita e passione.`},
-            {quote:`«Greenlights mean go – advance, carry on, continue.»`,source:`Matthew McConaughey, “Greenlights” (2020)`,context:`Metafora motivazionale: cogli le “luci verdi” della vita.`},
-            {quote:`«Quei semafori che a notte fonda, nelle strade deserte, alternano il verde e il rosso…»`,source:`Fabrizio Caramagna, aforisma (2022)`,context:`Il cambio luci nel vuoto diventa clessidra di tempo inutile.`},
-            {quote:`«Se fossi un attimo, vorrei essere l’attimo in cui scatta il verde e la vita ricomincia.»`,source:`Fabrizio Caramagna, tweet poetico (2020 ca.)`,context:`Il verde come simbolo di ripartenza e slancio.`},
-            {quote:`«Il semaforo divenne verde e Dorigo ebbe un sussulto per il clacson del solito imbecille…»`,source:`Dino Buzzati, “Un amore” (1963)`,context:`Il rosso permette al protagonista di perdersi nelle proprie gelosie; il verde lo riporta di colpo alla realtà.`},
-            {quote:`«Fast asleep at the traffic light, the veterans dream of the fight…»`,source:`Jackson Browne, “The Pretender” (1976)`,context:`Semaforo come crocevia di attese: sogni dei veterani e speranze dei bambini.`},
-            {quote:`«Gender is a construct, so is a traffic light, e se ignori entrambi ti investono le auto.»`,source:`Imogen Binnie, “Nevada” (2013)`,context:`Metafora pungente sul rispetto delle convenzioni sociali.`},
-            {quote:`«En una esquina, ante el semáforo rojo, alguien traga fuego, alguien lava parabrisas…»`,source:`Eduardo Galeano, “Il libro degli abbracci” (1989)`,context:`Il rosso rivela la micro-economia di strada e le disuguaglianze sociali.`},
-            {quote:`«È colpa del semaforo se diventa rosso quando passo io!»`,source:`Hirohiko Araki, “Le bizzarre avventure di JoJo” (1987)`,context:`Esclamazione ironica: il semaforo rosso come capro espiatorio.`},
-            {quote:`«Al semaforo scatta il verde e nessuno suona più il clacson: sono tutti chinati sullo smartphone.»`,source:`Anonimo, aforisma web (2020)`,context:`La distrazione tecnologica prolunga l’attesa anche quando il verde è arrivato.`}
-        ];
-
-        /* ---------- Gestione scheda citazione ---------- */
-        const card     = document.getElementById('random-quote-card');
-        const cardText = document.getElementById('quote-card-text');
-
-        const chosen = quotes[Math.floor(Math.random()*quotes.length)];
-        const preview = chosen.quote.length>120 ? `${chosen.quote.slice(0,117)}…»` : chosen.quote;
-        cardText.textContent = preview;
-
-        card.addEventListener('click', ()=>{
-            cardText.textContent = chosen.quote;
-        });
 
         /* ---------- PWA install ---------- */
         window.addEventListener('beforeinstallprompt',e=>{
@@ -274,8 +229,8 @@
         window.addEventListener('appinstalled',()=>{installButton.style.display='none';console.log('PWA installata');});
 
         emailButton.addEventListener('click',()=>{
-            const subject = encodeURIComponent('Segnalazione semaforo');
-            const body = encodeURIComponent(`Buongiorno,\nsegnalo un problema al semaforo di ${currentSemaforo}.`);
+            const subject = encodeURIComponent("Quando iniziano i lavori a Orezzo?");
+            const body = encodeURIComponent("Sono ancora fermo al semaforo di Orezzo, i lavori non sono iniziati.");
             window.location.href = `mailto:segreteria.manutenzionestrade@provincia.bergamo.it?subject=${subject}&body=${body}`;
         });
 
