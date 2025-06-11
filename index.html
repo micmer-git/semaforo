@@ -39,6 +39,9 @@
         #install-button{background:var(--install-button-bg);color:var(--install-button-text);border:none;border-radius:var(--install-button-border-radius);padding:12px 25px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:30px;margin-bottom:20px;display:none}
         #install-button:hover{background:var(--install-button-hover-bg);transform:translateY(-2px)}
 
+        #email-button{background:#007bff;color:#fff;border:none;border-radius:var(--install-button-border-radius);padding:12px 25px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:10px}
+        #email-button:hover{background:#0069d9;transform:translateY(-2px)}
+
         #developer-info{margin-top:20px;font-size:.9em;color:#777;text-align:center}
         #developer-info a{color:#007bff;text-decoration:none;font-weight:bold}
         #developer-info a:hover{text-decoration:underline}
@@ -47,16 +50,6 @@
         #reading-suggestion a{color:#28a745;text-decoration:none;font-weight:bold}
         #reading-suggestion a:hover{text-decoration:underline}
 
-        /* ----- nuova CARD citazione ----- */
-        .quote-card{background:#fff;border-radius:var(--border-radius-large);box-shadow:var(--box-shadow-light);padding:20px;max-width:320px;cursor:pointer;text-align:center;margin-top:35px;transition:transform .2s}
-        .quote-card:hover{transform:translateY(-3px)}
-        .quote-card span{font-weight:500;font-style:italic;color:#444}
-
-        /* overlay full-screen */
-        .quote-overlay{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;backdrop-filter:blur(4px);background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
-        .quote-content{background:#fff;border-radius:var(--border-radius-large);padding:30px;max-width:850px;width:100%;color:#333;position:relative;overflow-y:auto;max-height:90vh}
-        .quote-content blockquote{font-size:1.25em;font-style:italic;margin:0 0 20px 0;line-height:1.4}
-        #close-overlay{position:absolute;top:15px;right:20px;background:#ff5252;border:none;color:#fff;border-radius:50%;width:34px;height:34px;font-size:1.3em;font-weight:700;cursor:pointer}
 
         /* ----- responsivo (esistenti) ----- */
         @media (max-width:768px){
@@ -97,6 +90,7 @@
             <p>Ora attuale: <span id="orezzo-current-time"></span></p>
             <p>Prossimo cambio tra: <span id="orezzo-time-in-phase"></span></p>
         </div>
+        <button id="email-button">Scrivi in Provincia</button>
     </div>
 
     <!-- ----- Semaforo Gazzaniga ----- -->
@@ -112,20 +106,7 @@
         </div>
     </div>
 
-    <!-- ----- Scheda citazione casuale ----- -->
-    <div id="random-quote-card" class="quote-card">
-        <span id="quote-card-text">Scopri una citazione sul semaforo</span>
-    </div>
 
-    <!-- Overlay full-screen -->
-    <div id="quote-overlay" class="quote-overlay">
-        <div class="quote-content">
-            <button id="close-overlay">&times;</button>
-            <blockquote id="overlay-quote"></blockquote>
-            <p id="overlay-context"></p>
-            <p id="overlay-source" style="font-weight:700;text-align:right"></p>
-        </div>
-    </div>
 
     <button id="install-button">Installa App</button>
 
@@ -135,7 +116,8 @@
     </div>
 
     <div id="developer-info">
-        Un'idea di <strong>Alessandro Merelli</strong> sviluppata da <strong>Michele Merelli</strong> & <strong>Eduard Roccatello</strong>.
+        Un'idea di <strong>Alessandro Merelli</strong> sviluppata da da <strong><a href='https://linktr.ee/micmer' target='_blank' rel='noopener noreferrer'>Michele Merelli</a></strong> & <strong>Eduard Roccatello</strong>.
+
     </div>
 
     <!-- ----- Modale installazione PWA ----- -->
@@ -163,6 +145,7 @@
         const orezzoToggleButton    = document.getElementById('show-orezzo');
         const gazzanigaToggleButton = document.getElementById('show-gazzaniga');
         const installButton         = document.getElementById('install-button');
+        const emailButton           = document.getElementById('email-button');
         let deferredPrompt, currentSemaforo='orezzo';
 
         /* ---------- Orologio globale (fuso Europa/Roma) ---------- */
@@ -233,52 +216,6 @@
         orezzoToggleButton   .addEventListener('click',()=>showSemaforo('orezzo'));
         gazzanigaToggleButton.addEventListener('click',()=>showSemaforo('gazzaniga'));
 
-        /* ---------- Elenco citazioni ---------- */
-        const quotes = [
-            {quote:`«Il disco giallo si illuminò… Ormai i pedoni sono passati, ma il segnale di via libera per le macchine tarderà ancora alcuni secondi»`,source:`José Saramago, “Cecità” (1995)`,context:`Incipit: un automobilista diventa cieco mentre aspetta il verde. Le luci che cambiano annunciano il collasso dell’ordine quotidiano.`},
-            {quote:`«Tutte le sue luci, ad un tratto, si tinsero di blu, e la gente non sapeva più come regolarsi.»`,source:`Gianni Rodari, “Il semaforo blu” (1962)`,context:`Favola: il semaforo blu offre un “via libera per il cielo”, invito al coraggio di immaginare.`},
-            {quote:`«Il semaforo segnava giallo, giallo, giallo, continuando ad accendersi e riaccendersi.»`,source:`Italo Calvino, “Marcovaldo” (1963)`,context:`Nebbia in città: il giallo infinito diventa simbolo della monotonia urbana da cui Marcovaldo evade con la fantasia.`},
-            {quote:`«Cuando vio que la mujer se lanzaba a la calzada a pesar de las luces verdes, ya era tarde…»`,source:`Julio Cortázar, “La noche boca arriba” (1956)`,context:`Incidente al semaforo: il verde diventa tragedia e spartiacque fra realtà e incubo.`},
-            {quote:`«In piedi dietro al figlio, aspettando il verde, ricordò un tempo in cui aveva provato una solitudine profonda…»`,source:`Elizabeth Strout, “Olive Kitteridge” (2008)`,context:`L’attesa della luce verde è occasione di introspezione e ricordo.`},
-            {quote:`«A red traffic light loomed, and Cecilia slammed her foot on the brake.»`,source:`Liane Moriarty, “The Husband’s Secret” (2013)`,context:`Il rosso obbliga Cecilia a fermarsi e a rivalutare le proprie priorità.`},
-            {quote:`«Un uomo è in macchina, aspetta che scatti il verde… Il fatto è che il semaforo è verde già da un pezzo.»`,source:`Michael Frayn, “Sweet Dreams” (1973)`,context:`Satira: attesa paradossale che rivela indecisione esistenziale.`},
-            {quote:`«Anche i semafori hanno un umore. Certe mattine alcuni rossi sembrano durare più a lungo.»`,source:`Fabrizio Caramagna, aforisma (2022)`,context:`Personificazione del semaforo: il rosso lungo mette alla prova la nostra pazienza.`},
-            {quote:`«Il Secondo di New York è l’intervallo tra il verde e il clacson del taxi dietro di te.»`,source:`Terry Pratchett, “Streghe all’estero” (1992)`,context:`Umorismo: nelle metropoli l’attesa è ridotta al minimo.`},
-            {quote:`«Fermo al semaforo in attesa di trovare un titolo, vidi passare la donna più bella…»`,source:`Andrew Faber, titolo raccolta (2018)`,context:`Il rosso diventa scintilla d’ispirazione improvvisa.`},
-            {quote:`«Quando il semaforo diventa verde, il pickup non parte: è l’invito di lui a lasciare tutto…»`,source:`Robert J. Waller, “I ponti di Madison County” (1992)`,context:`Il verde sospeso segna un bivio di vita e passione.`},
-            {quote:`«Greenlights mean go – advance, carry on, continue.»`,source:`Matthew McConaughey, “Greenlights” (2020)`,context:`Metafora motivazionale: cogli le “luci verdi” della vita.`},
-            {quote:`«Quei semafori che a notte fonda, nelle strade deserte, alternano il verde e il rosso…»`,source:`Fabrizio Caramagna, aforisma (2022)`,context:`Il cambio luci nel vuoto diventa clessidra di tempo inutile.`},
-            {quote:`«Se fossi un attimo, vorrei essere l’attimo in cui scatta il verde e la vita ricomincia.»`,source:`Fabrizio Caramagna, tweet poetico (2020 ca.)`,context:`Il verde come simbolo di ripartenza e slancio.`},
-            {quote:`«Il semaforo divenne verde e Dorigo ebbe un sussulto per il clacson del solito imbecille…»`,source:`Dino Buzzati, “Un amore” (1963)`,context:`Il rosso permette al protagonista di perdersi nelle proprie gelosie; il verde lo riporta di colpo alla realtà.`},
-            {quote:`«Fast asleep at the traffic light, the veterans dream of the fight…»`,source:`Jackson Browne, “The Pretender” (1976)`,context:`Semaforo come crocevia di attese: sogni dei veterani e speranze dei bambini.`},
-            {quote:`«Gender is a construct, so is a traffic light, e se ignori entrambi ti investono le auto.»`,source:`Imogen Binnie, “Nevada” (2013)`,context:`Metafora pungente sul rispetto delle convenzioni sociali.`},
-            {quote:`«En una esquina, ante el semáforo rojo, alguien traga fuego, alguien lava parabrisas…»`,source:`Eduardo Galeano, “Il libro degli abbracci” (1989)`,context:`Il rosso rivela la micro-economia di strada e le disuguaglianze sociali.`},
-            {quote:`«È colpa del semaforo se diventa rosso quando passo io!»`,source:`Hirohiko Araki, “Le bizzarre avventure di JoJo” (1987)`,context:`Esclamazione ironica: il semaforo rosso come capro espiatorio.`},
-            {quote:`«Al semaforo scatta il verde e nessuno suona più il clacson: sono tutti chinati sullo smartphone.»`,source:`Anonimo, aforisma web (2020)`,context:`La distrazione tecnologica prolunga l’attesa anche quando il verde è arrivato.`}
-        ];
-
-        /* ---------- Gestione scheda citazione ---------- */
-        const card           = document.getElementById('random-quote-card');
-        const cardText       = document.getElementById('quote-card-text');
-        const overlay        = document.getElementById('quote-overlay');
-        const overlayQuote   = document.getElementById('overlay-quote');
-        const overlayContext = document.getElementById('overlay-context');
-        const overlaySource  = document.getElementById('overlay-source');
-        const closeBtn       = document.getElementById('close-overlay');
-
-        const chosen = quotes[Math.floor(Math.random()*quotes.length)];
-        const preview = chosen.quote.length>120 ? `${chosen.quote.slice(0,117)}…»` : chosen.quote;
-        cardText.textContent = preview;
-
-        card.addEventListener('click', ()=>{
-            overlayQuote.textContent   = chosen.quote;
-            overlayContext.textContent = chosen.context;
-            overlaySource.textContent  = chosen.source;
-            overlay.style.display='flex';
-        });
-        const closeOverlay = ()=> overlay.style.display='none';
-        closeBtn.addEventListener('click', closeOverlay);
-        overlay.addEventListener('click', e=>{ if(e.target===overlay) closeOverlay(); });
 
         /* ---------- PWA install ---------- */
         window.addEventListener('beforeinstallprompt',e=>{
@@ -292,6 +229,12 @@
         });
         document.getElementById('custom-install-close').addEventListener('click',()=>{document.getElementById('custom-install-modal').style.display='none'});
         window.addEventListener('appinstalled',()=>{installButton.style.display='none';console.log('PWA installata');});
+
+        emailButton.addEventListener('click',()=>{
+            const subject = encodeURIComponent("Quando iniziano i lavori a Orezzo?");
+            const body = encodeURIComponent("Sono ancora fermo al semaforo di Orezzo, i lavori non sono iniziati.");
+            window.location.href = `mailto:segreteria.manutenzionestrade@provincia.bergamo.it?subject=${subject}&body=${body}`;
+        });
 
         /* ---------- Service Worker ---------- */
         if('serviceWorker' in navigator){
