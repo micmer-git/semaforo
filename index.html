@@ -135,7 +135,7 @@
     </div>
 
     <div id="developer-info">
-        Un'idea di <strong>Alessandro Merelli</strong> sviluppata da <strong>Michele Merelli</strong>
+        Un'idea di <strong>Alessandro Merelli</strong> sviluppata da <strong>Michele Merelli</strong> & <strong>Eduard Roccatello</strong>.
     </div>
 
     <!-- ----- Modale installazione PWA ----- -->
@@ -300,11 +300,55 @@
             });
         }
 
+        /* ---------- Geolocation ---------- */
+        const minAccuracy = 150;
+        const llOrezzo = [45.804018, 9.824854];
+        const llGazzaniga = [45.801794, 9.824860];
+
+        function geolocate() {
+            return new Promise((resolve, reject) => {
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 5000 });
+                } else {
+                    reject("No geolocation support");
+                }
+            });
+        }
+        
+        function haversineDistanceBetweenPoints(lat1, lon1, lat2, lon2) {
+            const R = 6371e3;
+            const p1 = lat1 * Math.PI/180;
+            const p2 = lat2 * Math.PI/180;
+            const deltaLon = lon2 - lon1;
+            const deltaLambda = (deltaLon * Math.PI) / 180;
+            const d = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(deltaLambda)) * R;
+            return d;
+        }
+
         /* ---------- Avvio ---------- */
         (async()=>{
             await initGlobalTime();
-            showSemaforo('orezzo');
-            setInterval(updateTrafficLights,100);
+            let bestSemaphore = 'orezzo';
+            geolocate().then(pos => {
+                const coords = pos.coords;
+                if (coords.accuracy <= minAccuracy) {
+                    const dOrezzo = haversineDistanceBetweenPoints(coords.latitude, coords.longitude, llOrezzo[0], llOrezzo[1]);
+                    const dGazzaniga = haversineDistanceBetweenPoints(coords.latitude, coords.longitude, llGazzaniga[0], llGazzaniga[1]);
+                    const delta = dOrezzo - dGazzaniga;
+                    if (delta < 0) {
+                        bestSemaphore = 'orezzo'
+                    } else {
+                        bestSemaphore = 'gazzaniga';
+                    }
+                } else {
+                    console.log("Too little accuracy");
+                }
+            })
+            .catch(e => console.error(e))
+            .finally(() => {
+                showSemaforo(bestSemaphore);
+                setInterval(updateTrafficLights,100);
+            })
         })();
     </script>
 </body>
