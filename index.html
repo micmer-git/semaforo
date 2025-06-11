@@ -39,8 +39,6 @@
         #install-button{background:var(--install-button-bg);color:var(--install-button-text);border:none;border-radius:var(--install-button-border-radius);padding:12px 25px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:30px;margin-bottom:20px;display:none}
         #install-button:hover{background:var(--install-button-hover-bg);transform:translateY(-2px)}
 
-        #email-button{background:#007bff;color:#fff;border:none;border-radius:var(--install-button-border-radius);padding:12px 25px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:10px}
-        #email-button:hover{background:#0069d9;transform:translateY(-2px)}
 
         #developer-info{margin-top:20px;font-size:.9em;color:#777;text-align:center}
         #developer-info a{color:#007bff;text-decoration:none;font-weight:bold}
@@ -90,7 +88,6 @@
             <p>Ora attuale: <span id="orezzo-current-time"></span></p>
             <p>Prossimo cambio tra: <span id="orezzo-time-in-phase"></span></p>
         </div>
-        <button id="email-button">Scrivi in Provincia</button>
     </div>
 
     <!-- ----- Semaforo Gazzaniga ----- -->
@@ -143,7 +140,6 @@
         const orezzoToggleButton    = document.getElementById('show-orezzo');
         const gazzanigaToggleButton = document.getElementById('show-gazzaniga');
         const installButton         = document.getElementById('install-button');
-        const emailButton           = document.getElementById('email-button');
         let deferredPrompt, currentSemaforo='orezzo';
 
         /* ---------- Orologio globale (fuso Europa/Roma) ---------- */
@@ -228,11 +224,6 @@
         document.getElementById('custom-install-close').addEventListener('click',()=>{document.getElementById('custom-install-modal').style.display='none'});
         window.addEventListener('appinstalled',()=>{installButton.style.display='none';console.log('PWA installata');});
 
-        emailButton.addEventListener('click',()=>{
-            const subject = encodeURIComponent("Quando iniziano i lavori a Orezzo?");
-            const body = encodeURIComponent("Sono ancora fermo al semaforo di Orezzo, i lavori non sono iniziati.");
-            window.location.href = `mailto:segreteria.manutenzionestrade@provincia.bergamo.it?subject=${subject}&body=${body}`;
-        });
 
         /* ---------- Service Worker ---------- */
         if('serviceWorker' in navigator){
