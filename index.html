@@ -113,7 +113,7 @@
     </div>
 
     <div id="developer-info">
-        Un'idea di <strong>Alessandro Merelli</strong> sviluppata da <strong><a href='https://linktr.ee/micmer' target='_blank' rel='noopener noreferrer'>Michele Merelli</a></strong> & <strong>Eduard Roccatello</strong>.
+        Un'idea di <strong>Alessandro Merelli</strong> sviluppata da <strong><a href='https://linktr.ee/micmer' target='_blank' rel='noopener noreferrer'>Michele Merelli</a></strong> & <strong><a href='https://linktr.ee/eduardroccatello' target='_blank' rel='noopener noreferrer'>Eduard Roccatello</a></strong>.
 
     </div>
 
@@ -259,30 +259,48 @@
             return d;
         }
 
-        /* ---------- Avvio ---------- */
-        (async()=>{
-            await initGlobalTime();
+        function getBestSemaphoreFromLocation(coords) {
+            if (coords.accuracy <= minAccuracy) {
+                const dOrezzo = haversineDistanceBetweenPoints(coords.latitude, coords.longitude, llOrezzo[0], llOrezzo[1]);
+                const dGazzaniga = haversineDistanceBetweenPoints(coords.latitude, coords.longitude, llGazzaniga[0], llGazzaniga[1]);
+                const delta = dOrezzo - dGazzaniga;
+                if (delta > 0) {
+                    return 'gazzaniga';
+                }
+            } else {
+                console.log("Too little accuracy");
+            }
+            return 'orezzo';
+        }
+
+        let updateHandle = null;
+        function start() {
             let bestSemaphore = 'orezzo';
             geolocate().then(pos => {
-                const coords = pos.coords;
-                if (coords.accuracy <= minAccuracy) {
-                    const dOrezzo = haversineDistanceBetweenPoints(coords.latitude, coords.longitude, llOrezzo[0], llOrezzo[1]);
-                    const dGazzaniga = haversineDistanceBetweenPoints(coords.latitude, coords.longitude, llGazzaniga[0], llGazzaniga[1]);
-                    const delta = dOrezzo - dGazzaniga;
-                    if (delta < 0) {
-                        bestSemaphore = 'orezzo'
-                    } else {
-                        bestSemaphore = 'gazzaniga';
-                    }
-                } else {
-                    console.log("Too little accuracy");
-                }
+                bestSemaphore = getBestSemaphoreFromLocation(pos.coords);
             })
             .catch(e => console.error(e))
             .finally(() => {
                 showSemaforo(bestSemaphore);
-                setInterval(updateTrafficLights,100);
-            })
+                if (updateHandle !== null) {
+                    clearInterval(updateHandle);
+                    updateHandle = null;
+                }
+                updateHandle = setInterval(updateTrafficLights, 100);
+            });
+        }
+
+        window.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "visible") {
+                start();
+            }
+        });
+
+
+        /* ---------- Avvio ---------- */
+        (async()=>{
+            await initGlobalTime();
+            start();
         })();
     </script>
 </body>
