@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+eTkoJ8r9g1xm93P4zXAoD/hPcTAX6eOZ8/l7zvYg=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1jG8z6tY6LRNUwZGjKIbN+VK65vj1LXMoIvui5+I=" crossorigin=""></script>
 
@@ -165,6 +166,7 @@
         const routeModal           = document.getElementById('route-modal');
         const routeClose           = document.getElementById('route-close');
         const routeInfo            = document.getElementById('route-info');
+
         let map, routeLayer;
         let deferredPrompt, currentSemaforo='orezzo';
 
@@ -309,6 +311,7 @@
             routeInfo.textContent='Calcolo...';
             routeModal.style.display='flex';
             try{
+
                 const pos = await geolocate();
                 const best = getBestSemaphoreFromLocation(pos.coords);
                 const dest = best==='orezzo'?llOrezzo:llGazzaniga;
