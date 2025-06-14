@@ -8,8 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    <!-- Google Maps API (supply a valid key) -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+eTkoJ8r9g1xm93P4zXAoD/hPcTAX6eOZ8/l7zvYg=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1jG8z6tY6LRNUwZGjKIbN+VK65vj1LXMoIvui5+I=" crossorigin=""></script>
 
     <style>
         :root{
@@ -165,7 +166,8 @@
         const routeModal           = document.getElementById('route-modal');
         const routeClose           = document.getElementById('route-close');
         const routeInfo            = document.getElementById('route-info');
-        let map, directionsService, directionsRenderer;
+
+        let map, routeLayer;
         let deferredPrompt, currentSemaforo='orezzo';
 
         /* ---------- Orologio globale (fuso Europa/Roma) ---------- */
@@ -309,32 +311,29 @@
             routeInfo.textContent='Calcolo...';
             routeModal.style.display='flex';
             try{
-                const pos  = await geolocate();
+
+                const pos = await geolocate();
                 const best = getBestSemaphoreFromLocation(pos.coords);
                 const dest = best==='orezzo'?llOrezzo:llGazzaniga;
-
-                if(!map){
-                    map = new google.maps.Map(document.getElementById('map'),{zoom:14,center:{lat:pos.coords.latitude,lng:pos.coords.longitude}});
-                    directionsService  = new google.maps.DirectionsService();
-                    directionsRenderer = new google.maps.DirectionsRenderer({map});
-                }
-
-                const result = await new Promise((resolve,reject)=>{
-                    directionsService.route({
-                        origin:{lat:pos.coords.latitude,lng:pos.coords.longitude},
-                        destination:{lat:dest[0],lng:dest[1]},
-                        travelMode:google.maps.TravelMode.DRIVING
-                    },(res,status)=>{
-                        if(status==='OK') resolve(res); else reject(status);
-                    });
-                });
-
-                directionsRenderer.setDirections(result);
-                const durationSec = result.routes[0].legs[0].duration.value;
-                const arrival     = getGlobalNow().getTime()+durationSec*1000;
-                const color       = getColorAtTimestamp(best==='orezzo'?orezzoRefGreenTime:gazzanigaRefGreenTime, arrival);
+                const resp = await fetch(`https://router.project-osrm.org/route/v1/driving/${pos.coords.longitude},${pos.coords.latitude};${dest[1]},${dest[0]}?overview=full&geometries=geojson`);
+                const data = await resp.json();
+                const durationSec = data.routes[0].duration;
+                const arrival = getGlobalNow().getTime()+durationSec*1000;
+                const color = getColorAtTimestamp(best==='orezzo'?orezzoRefGreenTime:gazzanigaRefGreenTime, arrival);
                 const arrTxt = new Date(arrival).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:'Europe/Rome'});
                 routeInfo.textContent = `Arrivo in circa ${Math.round(durationSec/60)} min (${arrTxt}). Stato previsto: ${color}`;
+                if(!map){
+                    map = L.map('map');
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+                    routeLayer = L.geoJSON(null,{style:{color:'#007bff',weight:5}}).addTo(map);
+                }else{
+                    routeLayer.clearLayers();
+                    map.eachLayer(l=>{if(l instanceof L.Marker) map.removeLayer(l);});
+                }
+                routeLayer.addData(data.routes[0].geometry);
+                L.marker([pos.coords.latitude,pos.coords.longitude]).addTo(map);
+                L.marker(dest).addTo(map);
+                map.fitBounds(routeLayer.getBounds(),{padding:[20,20]});
             }catch(e){
                 routeInfo.textContent='Errore nel calcolo del percorso';
                 console.error(e);
