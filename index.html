@@ -9,9 +9,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+eTkoJ8r9g1xm93P4zXAoD/hPcTAX6eOZ8/l7zvYg=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1jG8z6tY6LRNUwZGjKIbN+VK65vj1LXMoIvui5+I=" crossorigin=""></script>
-
     <style>
         :root{
             --traffic-light-width:150px;--traffic-light-height:450px;--light-size:100px;--spacing:20px;
@@ -41,14 +38,6 @@
 
         #install-button{background:var(--install-button-bg);color:var(--install-button-text);border:none;border-radius:var(--install-button-border-radius);padding:12px 25px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:30px;margin-bottom:20px;display:none}
         #install-button:hover{background:var(--install-button-hover-bg);transform:translateY(-2px)}
-
-        #route-button{background:#007bff;color:#fff;border:none;border-radius:8px;padding:12px 25px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:20px}
-        #route-button:hover{background:#0056b3;transform:translateY(-2px)}
-
-        #route-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;justify-content:center;align-items:center;z-index:1100}
-        #route-modal .modal-content{background:#fff;padding:20px;border-radius:12px;width:90%;max-width:600px;box-shadow:var(--box-shadow-heavy)}
-        #route-close{float:right;font-size:1.5em;cursor:pointer}
-        #map{height:300px;margin-top:10px}
 
 
         #developer-info{margin-top:20px;font-size:.9em;color:#777;text-align:center}
@@ -117,7 +106,6 @@
 
 
     <button id="install-button">Installa App</button>
-    <button id="route-button">Calcola Percorso</button>
 
     <div id="reading-suggestion">
         Nell'attesa, leggi qualcosa di <a href="https://fortissimo.substack.com/" target="_blank" rel="noopener noreferrer">fortissimo</a>
@@ -127,14 +115,6 @@
     <div id="developer-info">
         Un'idea di <strong>Alessandro Merelli</strong> sviluppata da <strong><a href='https://linktr.ee/micmer' target='_blank' rel='noopener noreferrer'>Michele Merelli</a></strong> & <strong><a href='https://linktr.ee/eduardroccatello' target='_blank' rel='noopener noreferrer'>Eduard Roccatello</a></strong>.
 
-    </div>
-
-    <div id="route-modal">
-        <div class="modal-content">
-            <span id="route-close">&times;</span>
-            <div id="route-info"></div>
-            <div id="map"></div>
-        </div>
     </div>
 
     <!-- ----- Modale installazione PWA ----- -->
@@ -162,12 +142,6 @@
         const orezzoToggleButton    = document.getElementById('show-orezzo');
         const gazzanigaToggleButton = document.getElementById('show-gazzaniga');
         const installButton         = document.getElementById('install-button');
-        const routeButton          = document.getElementById('route-button');
-        const routeModal           = document.getElementById('route-modal');
-        const routeClose           = document.getElementById('route-close');
-        const routeInfo            = document.getElementById('route-info');
-
-        let map, routeLayer;
         let deferredPrompt, currentSemaforo='orezzo';
 
         /* ---------- Orologio globale (fuso Europa/Roma) ---------- */
@@ -187,14 +161,6 @@
 
         /* ---------- Utility ---------- */
         const formatTimeSeconds = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(Math.floor(s%60)).padStart(2,'0')}`;
-
-        function getColorAtTimestamp(refGreen, timeMs){
-            const elapsed = timeMs - refGreen;
-            const timeInCycle = (elapsed%totalCycleDuration+totalCycleDuration)%totalCycleDuration;
-            if(timeInCycle < greenDuration) return 'verde';
-            if(timeInCycle < greenDuration+orangeDuration) return 'arancione';
-            return 'rosso';
-        }
 
         /* ---------- Aggiorna semaforo ---------- */
         function updateLight(el, refGreen){
@@ -306,42 +272,6 @@
             }
             return 'orezzo';
         }
-
-        async function openRouteModal(){
-            routeInfo.textContent='Calcolo...';
-            routeModal.style.display='flex';
-            try{
-
-                const pos = await geolocate();
-                const best = getBestSemaphoreFromLocation(pos.coords);
-                const dest = best==='orezzo'?llOrezzo:llGazzaniga;
-                const resp = await fetch(`https://router.project-osrm.org/route/v1/driving/${pos.coords.longitude},${pos.coords.latitude};${dest[1]},${dest[0]}?overview=full&geometries=geojson`);
-                const data = await resp.json();
-                const durationSec = data.routes[0].duration;
-                const arrival = getGlobalNow().getTime()+durationSec*1000;
-                const color = getColorAtTimestamp(best==='orezzo'?orezzoRefGreenTime:gazzanigaRefGreenTime, arrival);
-                const arrTxt = new Date(arrival).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:'Europe/Rome'});
-                routeInfo.textContent = `Arrivo in circa ${Math.round(durationSec/60)} min (${arrTxt}). Stato previsto: ${color}`;
-                if(!map){
-                    map = L.map('map');
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-                    routeLayer = L.geoJSON(null,{style:{color:'#007bff',weight:5}}).addTo(map);
-                }else{
-                    routeLayer.clearLayers();
-                    map.eachLayer(l=>{if(l instanceof L.Marker) map.removeLayer(l);});
-                }
-                routeLayer.addData(data.routes[0].geometry);
-                L.marker([pos.coords.latitude,pos.coords.longitude]).addTo(map);
-                L.marker(dest).addTo(map);
-                map.fitBounds(routeLayer.getBounds(),{padding:[20,20]});
-            }catch(e){
-                routeInfo.textContent='Errore nel calcolo del percorso';
-                console.error(e);
-            }
-        }
-
-        routeButton.addEventListener('click',openRouteModal);
-        routeClose.addEventListener('click',()=>{routeModal.style.display='none'});
 
         let updateHandle = null;
         function start() {
