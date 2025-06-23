@@ -149,12 +149,19 @@
 
         async function initGlobalTime(){
             try{
-                const res = await fetch('https://worldtimeapi.org/api/timezone/Europe/Rome');
-                const data = await res.json();
-                globalTimeOffset = new Date(data.datetime).getTime() - Date.now();
+                const res = await fetch('https://time.is/Unix_time_now');
+                const txt = await res.text();
+                const serverNow = parseInt(txt.trim(),10)*1000;
+                globalTimeOffset = serverNow - Date.now();
             }catch(err){
-                console.error('Impossibile sincronizzare l’ora: uso l’orologio del dispositivo', err);
-                globalTimeOffset = 0;
+                try{
+                    const res = await fetch('https://worldtimeapi.org/api/timezone/Europe/Rome');
+                    const data = await res.json();
+                    globalTimeOffset = new Date(data.datetime).getTime() - Date.now();
+                }catch(err2){
+                    console.error('Impossibile sincronizzare l\u2019ora: uso l\u2019orologio del dispositivo', err2);
+                    globalTimeOffset = 0;
+                }
             }
         }
         const getGlobalNow = () => new Date(Date.now()+globalTimeOffset);
