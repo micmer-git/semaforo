@@ -170,7 +170,7 @@
         let deferredPrompt, currentSemaforo='orezzo';
 
         /* ---------- Orologio globale (fuso Europa/Roma) ---------- */
-        let globalTimeOffset = 0; // ms rispetto a Date.now()
+        let globalTimeOffset = parseInt(localStorage.getItem('globalTimeOffset')||'0',10); // ms rispetto a Date.now()
 
         async function initGlobalTime(){
             try{
@@ -178,17 +178,20 @@
                 const txt = await res.text();
                 const serverNow = parseInt(txt.trim(),10)*1000;
                 globalTimeOffset = serverNow - Date.now();
+                localStorage.setItem('globalTimeOffset', String(globalTimeOffset));
             }catch(err){
                 try{
                     const res = await fetch('https://worldtimeapi.org/api/timezone/Europe/Rome');
                     const data = await res.json();
                     globalTimeOffset = new Date(data.datetime).getTime() - Date.now();
+                    localStorage.setItem('globalTimeOffset', String(globalTimeOffset));
                 }catch(err2){
                     console.error('Impossibile sincronizzare l\u2019ora: uso l\u2019orologio del dispositivo', err2);
-                    globalTimeOffset = 0;
+                    // mantieni offset esistente o 0
                 }
             }
         }
+        window.addEventListener('online', initGlobalTime);
         const getGlobalNow = () => new Date(Date.now()+globalTimeOffset);
 
         /* ---------- Utility ---------- */
