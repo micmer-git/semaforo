@@ -51,6 +51,13 @@
         .group-times{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
         .time-pill{background:var(--toggle-bg);border-radius:8px;padding:5px 10px;min-width:48px}
 
+        .schedule-table{width:100%;border-collapse:collapse;font-size:1.1em;margin-top:10px}
+        .schedule-table th,.schedule-table td{border:1px solid #e0e0e0;padding:6px;text-align:center;vertical-align:top}
+        .schedule-table th{background:var(--toggle-bg);font-weight:700}
+        .hour-pill{background:var(--toggle-bg);border-radius:50%;padding:6px 10px;display:inline-block;font-weight:700}
+        .minute-pill{background:var(--toggle-bg);border-radius:12px;padding:2px 6px;display:inline-block;margin-right:2px;font-weight:700}
+        .seconds-text{font-size:.9em;margin-left:2px}
+
         #install-button{background:var(--install-button-bg);color:var(--install-button-text);border:none;border-radius:var(--install-button-border-radius);padding:12px 25px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:30px;margin-bottom:20px;display:none}
         #install-button:hover{background:var(--install-button-hover-bg);transform:translateY(-2px)}
 
@@ -73,6 +80,7 @@
             .time-display{max-width:280px}.time-display p{font-size:1.1em}
             #install-button{padding:10px 20px;font-size:1em}
             .time-pill{padding:4px 8px;font-size:.9em}
+            .minute-pill{padding:4px 8px;font-size:.9em}
         }
         @media (max-width:480px){
             #main-title{font-size:1.8em}
@@ -82,6 +90,7 @@
             .time-display{max-width:250px;padding:15px}.time-display p{font-size:1em}
             #install-button{padding:8px 15px;font-size:.9em}
             .time-pill{padding:3px 6px;font-size:.8em}
+            .minute-pill{padding:3px 6px;font-size:.8em}
         }
     </style>
 </head>
@@ -103,7 +112,7 @@
                 <button id="filter-orezzo" class="filter-btn">Orezzo</button>
                 <button id="filter-gazzaniga" class="filter-btn">Gazzaniga</button>
             </div>
-            <div id="schedule-content" class="schedule-list"></div>
+            <div id="schedule-content"></div>
         </div>
     </div>
 
@@ -225,26 +234,33 @@
         }
 
         function updateScheduleList(){
-            const ref = scheduleView==='orezzo'?orezzoRefGreenTime:gazzanigaRefGreenTime;
+            const ref   = scheduleView==='orezzo'?orezzoRefGreenTime:gazzanigaRefGreenTime;
             const times = computeUpcoming(ref);
             filterOrezzoBtn.classList.toggle('active', scheduleView==='orezzo');
             filterGazzanigaBtn.classList.toggle('active', scheduleView==='gazzaniga');
 
-            const groups=[];
+            const groups = {};
             times.forEach(t=>{
-                const hour = t.toLocaleTimeString('it-IT',{hour:'2-digit',timeZone:'Europe/Rome',hour12:false});
-                const mmss = t.toLocaleTimeString('it-IT',{minute:'2-digit',second:'2-digit',timeZone:'Europe/Rome'});
-                let g=groups[groups.length-1];
-                if(!g || g.hour!==hour){
-                    g={hour,list:[]};
-                    groups.push(g);
-                }
-                g.list.push(mmss);
+                const hour   = t.toLocaleTimeString('it-IT',{hour:'2-digit',timeZone:'Europe/Rome',hour12:false});
+                const minute = t.toLocaleTimeString('it-IT',{minute:'2-digit',timeZone:'Europe/Rome'});
+                const second = t.toLocaleTimeString('it-IT',{second:'2-digit',timeZone:'Europe/Rome'});
+                const band   = Math.floor(parseInt(minute,10)/10)*10;
+                if(!groups[hour]) groups[hour] = {0:[],10:[],20:[],30:[],40:[],50:[]};
+                groups[hour][band].push({minute,second});
             });
 
-            scheduleContent.innerHTML = groups.map(g=>
-                `<div class="schedule-group"><div class="group-hour">${g.hour}</div><div class="group-times">${g.list.map(t=>`<span class="time-pill">${t}</span>`).join('')}</div></div>`
-            ).join('');
+            const hours = Object.keys(groups).sort((a,b)=>parseInt(a,10)-parseInt(b,10));
+            let html = '<table class="schedule-table"><thead><tr><th>Ora</th><th>00-09</th><th>10-19</th><th>20-29</th><th>30-39</th><th>40-49</th><th>50-59</th></tr></thead><tbody>';
+            hours.forEach(h=>{
+                html += `<tr><td><span class="hour-pill">${h}</span></td>`;
+                [0,10,20,30,40,50].forEach(b=>{
+                    const list = groups[h][b].map(t=>`<span class="minute-pill">${t.minute}</span><span class="seconds-text">${t.second}</span>`).join('<br>');
+                    html += `<td>${list}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            scheduleContent.innerHTML = html;
         }
 
         function openSchedule(){
