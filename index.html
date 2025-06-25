@@ -36,15 +36,15 @@
         .time-display{background:var(--panel-background);border-radius:var(--border-radius-large);padding:var(--spacing);box-shadow:var(--box-shadow-light);text-align:center;width:90vw;max-width:300px;box-sizing:border-box;border:1px solid #e0e0e0}
         .time-display p{margin:8px 0;font-size:1.2em;font-weight:400}.time-display span{font-weight:700;color:#2c3e50}
 
-        #schedule-button{background:var(--toggle-active-bg);color:#fff;border:none;border-radius:var(--install-button-border-radius);padding:12px 25px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:10px}
-        #schedule-button:hover{background:#0069d9;transform:translateY(-2px)}
+        .primary-btn{background:var(--toggle-active-bg);color:#fff;border:none;border-radius:var(--install-button-border-radius);padding:12px 25px;font-size:1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:10px}
+        .primary-btn:hover{background:#0069d9;transform:translateY(-2px)}
 
         #schedule-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);justify-content:center;align-items:center;z-index:1001}
         #schedule-modal .modal-content{background:#fff;border-radius:12px;padding:20px;max-height:80vh;overflow-y:auto;box-shadow:var(--box-shadow-heavy);width:90vw;max-width:500px}
         #schedule-content{overflow-x:auto}
         #schedule-modal .modal-close{float:right;cursor:pointer;font-size:1.5em}
         #schedule-filter{display:flex;background-color:var(--toggle-bg);border-radius:15px;padding:5px;margin-bottom:15px;justify-content:center}
-        .filter-btn{padding:8px 20px;font-size:1em;font-weight:700;color:var(--toggle-text-color);background:transparent;border:none;border-radius:12px;cursor:pointer;flex-grow:1;transition:.3s}
+        .filter-btn{padding:8px 20px;font-size:1em;font-weight:700;color:var(--toggle-text-color);background:var(--toggle-bg);border:none;border-radius:12px;cursor:pointer;flex-grow:1;transition:.3s;box-shadow:var(--box-shadow-light);margin:0 4px}
         .filter-btn.active{background:var(--toggle-active-bg);color:var(--toggle-active-text-color);box-shadow:0 2px 8px rgba(0,0,0,.2)}
         .schedule-list{list-style:none;padding:0;margin:0;text-align:center;font-size:1.2em}
         .schedule-group{margin-bottom:15px}
@@ -52,14 +52,15 @@
         .group-times{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
         .time-pill{background:var(--toggle-bg);border-radius:8px;padding:5px 10px;display:inline-block;min-width:48px;font-weight:700;margin:2px}
 
-        .schedule-table{width:100%;border-collapse:collapse;font-size:1.1em;margin-top:10px;table-layout:fixed}
+        .schedule-table{width:100%;border-collapse:collapse;font-size:.95em;margin-top:10px;table-layout:fixed}
         .schedule-table th,.schedule-table td{border:1px solid #e0e0e0;padding:6px;text-align:center;vertical-align:top}
         .schedule-table th{background:var(--toggle-bg);font-weight:700}
         .hour-pill{background:var(--toggle-bg);border-radius:8px;padding:5px 10px;display:inline-block;min-width:48px;font-weight:700;position:relative}
         .hour-pill::after{content:'h';color:var(--toggle-active-bg);margin-left:3px;font-weight:700}
 
-        #install-button{background:var(--install-button-bg);color:var(--install-button-text);border:none;border-radius:var(--install-button-border-radius);padding:12px 25px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:30px;margin-bottom:20px;display:none}
-        #install-button:hover{background:var(--install-button-hover-bg);transform:translateY(-2px)}
+        #install-button{background:var(--install-button-bg);color:var(--install-button-text);display:none;margin-top:30px;margin-bottom:20px}
+        #install-button:hover{background:var(--install-button-hover-bg)}
+        #schedule-button{margin-top:10px}
 
 
         #developer-info{margin-top:20px;font-size:.9em;color:#777;text-align:center}
@@ -78,9 +79,9 @@
             .traffic-light-container{width:120px;height:360px;padding:15px}
             .light{width:80px;height:80px}
             .time-display{max-width:280px}.time-display p{font-size:1.1em}
-            #install-button{padding:10px 20px;font-size:1em}
+            #install-button,#schedule-button{padding:10px 20px;font-size:1em}
             .time-pill{padding:4px 8px;font-size:.9em}
-            .schedule-table{font-size:1em}
+            .schedule-table{font-size:.9em}
         }
         @media (max-width:480px){
             #main-title{font-size:1.8em}
@@ -88,9 +89,9 @@
             .traffic-light-container{width:100px;height:300px;padding:10px}
             .light{width:70px;height:70px}
             .time-display{max-width:250px;padding:15px}.time-display p{font-size:1em}
-            #install-button{padding:8px 15px;font-size:.9em}
+            #install-button,#schedule-button{padding:8px 15px;font-size:.9em}
             .time-pill{padding:3px 6px;font-size:.8em}
-            .schedule-table{font-size:.9em}
+            .schedule-table{font-size:.8em}
             .schedule-table th,.schedule-table td{padding:4px}
         }
     </style>
@@ -145,9 +146,9 @@
 
 
 
-    <button id="schedule-button">Orari Verdi</button>
+    <button id="schedule-button" class="primary-btn">Orari Verdi</button>
 
-    <button id="install-button">Installa App</button>
+    <button id="install-button" class="primary-btn">Installa App</button>
 
     <div id="reading-suggestion">
         Nell'attesa: <br> leggi qualcosa di <a href="https://fortissimo.substack.com/" target="_blank" rel="noopener noreferrer">fortissimo</a> <br>
