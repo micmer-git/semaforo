@@ -45,7 +45,11 @@
         #schedule-filter{display:flex;background-color:var(--toggle-bg);border-radius:15px;padding:5px;margin-bottom:15px;justify-content:center}
         .filter-btn{padding:8px 20px;font-size:1em;font-weight:700;color:var(--toggle-text-color);background:transparent;border:none;border-radius:12px;cursor:pointer;flex-grow:1;transition:.3s}
         .filter-btn.active{background:var(--toggle-active-bg);color:var(--toggle-active-text-color);box-shadow:0 2px 8px rgba(0,0,0,.2)}
-        .schedule-list{list-style:none;padding:0;margin:0;text-align:center;font-size:1.2em}
+        .schedule-list{list-style:none;padding:0;margin:0;text-align:center;font-size:1.1em}
+        .schedule-table{width:100%;border-collapse:collapse;margin-bottom:10px}
+        .schedule-table th,.schedule-table td{text-align:center;padding:6px}
+        .hour-pill,.minute-pill{background:var(--toggle-bg);border-radius:8px;padding:4px 6px;font-weight:700;display:inline-block;margin:2px}
+        .time-sec{font-size:.85em;color:#555}
 
         #install-button{background:var(--install-button-bg);color:var(--install-button-text);border:none;border-radius:var(--install-button-border-radius);padding:12px 25px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:var(--box-shadow-light);transition:background-color .3s,transform .1s;margin-top:30px;margin-bottom:20px;display:none}
         #install-button:hover{background:var(--install-button-hover-bg);transform:translateY(-2px)}
@@ -68,6 +72,7 @@
             .light{width:80px;height:80px}
             .time-display{max-width:280px}.time-display p{font-size:1.1em}
             #install-button{padding:10px 20px;font-size:1em}
+            .minute-pill{padding:4px 8px;font-size:.9em}
         }
         @media (max-width:480px){
             #main-title{font-size:1.8em}
@@ -76,6 +81,7 @@
             .light{width:70px;height:70px}
             .time-display{max-width:250px;padding:15px}.time-display p{font-size:1em}
             #install-button{padding:8px 15px;font-size:.9em}
+            .minute-pill{padding:3px 6px;font-size:.8em}
         }
     </style>
 </head>
@@ -97,7 +103,7 @@
                 <button id="filter-orezzo" class="filter-btn">Orezzo</button>
                 <button id="filter-gazzaniga" class="filter-btn">Gazzaniga</button>
             </div>
-            <ul id="schedule-content" class="schedule-list"></ul>
+            <div id="schedule-content" class="schedule-list"></div>
         </div>
     </div>
 
@@ -223,7 +229,37 @@
             const times = computeUpcoming(ref);
             filterOrezzoBtn.classList.toggle('active', scheduleView==='orezzo');
             filterGazzanigaBtn.classList.toggle('active', scheduleView==='gazzaniga');
-            scheduleContent.innerHTML = times.map(t=>`<li>${t.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Europe/Rome'})}</li>`).join('');
+
+            const hours={};
+            times.forEach(t=>{
+                const hour = t.toLocaleTimeString('it-IT',{hour:'2-digit',hour12:false,timeZone:'Europe/Rome'});
+                const minute = t.toLocaleTimeString('it-IT',{minute:'2-digit',timeZone:'Europe/Rome'});
+                const second = t.toLocaleTimeString('it-IT',{second:'2-digit',timeZone:'Europe/Rome'});
+                if(!hours[hour]) hours[hour] = [[],[],[],[],[],[]];
+                const idx = Math.floor(parseInt(minute,10)/10);
+                hours[hour][idx].push({minute,second});
+            });
+
+            const rows = Object.keys(hours).sort().map(h=>{
+                const cells = hours[h].map(list=>`<td>${list.map(t=>`<div><span class="minute-pill">${t.minute}</span> <span class="time-sec">${t.second}</span></div>`).join('')}</td>`).join('');
+                return `<tr><th><span class="hour-pill">${h}</span></th>${cells}</tr>`;
+            }).join('');
+
+            scheduleContent.innerHTML = `
+                <table class="schedule-table" id="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>H</th>
+                            <th>00-09</th>
+                            <th>10-19</th>
+                            <th>20-29</th>
+                            <th>30-39</th>
+                            <th>40-49</th>
+                            <th>50-59</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
         }
 
         function openSchedule(){
