@@ -41,7 +41,7 @@
 
         #schedule-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);justify-content:center;align-items:center;z-index:1001}
         #schedule-modal .modal-content{background:#fff;border-radius:12px;padding:20px;max-height:80vh;overflow-y:auto;box-shadow:var(--box-shadow-heavy);width:90vw;max-width:500px}
-        #schedule-content{overflow-x:auto}
+        #schedule-content{overflow-x:auto;max-height: 400px;}
         #schedule-modal .modal-close{float:right;cursor:pointer;font-size:1.5em}
         #schedule-filter{display:flex;background-color:var(--toggle-bg);border-radius:15px;padding:5px;margin-bottom:15px;justify-content:center}
         .filter-btn{padding:8px 20px;font-size:1em;font-weight:700;color:var(--toggle-text-color);background:var(--toggle-bg);border:none;border-radius:12px;cursor:pointer;flex-grow:1;transition:.3s;box-shadow:var(--box-shadow-light);margin:0 4px}
@@ -243,25 +243,33 @@
             return times;
         }
 
+        const pad = n => `${Math.floor(Math.abs(n))}`.padStart(2, '0');
+        const toISOStringPrefix = date => {
+            return date.getFullYear() +
+                '-' + pad(date.getMonth() + 1) +
+                '-' + pad(date.getDate()) +
+                'T' + pad(date.getHours());
+        };
+
         function updateScheduleList(){
             const ref   = scheduleView==='orezzo'?orezzoRefGreenTime:gazzanigaRefGreenTime;
-            const times = computeUpcoming(ref);
+            const times = computeUpcoming(ref, 24);
             filterOrezzoBtn.classList.toggle('active', scheduleView==='orezzo');
             filterGazzanigaBtn.classList.toggle('active', scheduleView==='gazzaniga');
 
             const groups = {};
             times.forEach(t=>{
-                const hour   = t.toLocaleTimeString('it-IT',{hour:'2-digit',timeZone:'Europe/Rome',hour12:false});
+                const isoPrefix = toISOStringPrefix(t);
+                // const hour   = t.toLocaleTimeString('it-IT',{hour:'2-digit',timeZone:'Europe/Rome',hour12:false});
                 const minute = t.toLocaleTimeString('it-IT',{minute:'2-digit',timeZone:'Europe/Rome'});
                 const band   = Math.floor(parseInt(minute,10)/10)*10;
-                if(!groups[hour]) groups[hour] = {0:[],10:[],20:[],30:[],40:[],50:[]};
-                groups[hour][band].push({minute});
+                if(!groups[isoPrefix]) groups[isoPrefix] = {0:[],10:[],20:[],30:[],40:[],50:[]};
+                groups[isoPrefix][band].push({minute});
             });
 
-            const hours = Object.keys(groups).sort((a,b)=>parseInt(a,10)-parseInt(b,10));
             let html = '<table class="schedule-table"><thead><tr><th>Ora</th>' + '<th></th>'.repeat(6) + '</tr></thead><tbody>';
-            hours.forEach(h=>{
-                html += `<tr><td><span class="hour-pill">${h}</span></td>`;
+            Object.keys(groups).sort().forEach(h => {
+                html += `<tr><td><span class="hour-pill">${h.slice(-2)}</span></td>`;
                 [0,10,20,30,40,50].forEach(b=>{
                     const list = groups[h][b].map(t=>`<span class="time-pill">${t.minute}</span>`).join(' ');
                     html += `<td>${list}</td>`;
