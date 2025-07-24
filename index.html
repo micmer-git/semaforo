@@ -243,6 +243,14 @@
             return times;
         }
 
+        const pad = n => `${Math.floor(Math.abs(n))}`.padStart(2, '0');
+        const toISOStringPrefix = date => {
+            return date.getFullYear() +
+                '-' + pad(date.getMonth() + 1) +
+                '-' + pad(date.getDate()) +
+                'T' + pad(date.getHours());
+        };
+
         function updateScheduleList(){
             const ref   = scheduleView==='orezzo'?orezzoRefGreenTime:gazzanigaRefGreenTime;
             const times = computeUpcoming(ref);
@@ -251,17 +259,17 @@
 
             const groups = {};
             times.forEach(t=>{
-                const hour   = t.toLocaleTimeString('it-IT',{hour:'2-digit',timeZone:'Europe/Rome',hour12:false});
+                const isoPrefix = toISOStringPrefix(t);
+                // const hour   = t.toLocaleTimeString('it-IT',{hour:'2-digit',timeZone:'Europe/Rome',hour12:false});
                 const minute = t.toLocaleTimeString('it-IT',{minute:'2-digit',timeZone:'Europe/Rome'});
                 const band   = Math.floor(parseInt(minute,10)/10)*10;
-                if(!groups[hour]) groups[hour] = {0:[],10:[],20:[],30:[],40:[],50:[]};
-                groups[hour][band].push({minute});
+                if(!groups[isoPrefix]) groups[isoPrefix] = {0:[],10:[],20:[],30:[],40:[],50:[]};
+                groups[isoPrefix][band].push({minute});
             });
 
-            const hours = Object.keys(groups).sort((a,b)=>parseInt(a,10)-parseInt(b,10));
             let html = '<table class="schedule-table"><thead><tr><th>Ora</th>' + '<th></th>'.repeat(6) + '</tr></thead><tbody>';
-            hours.forEach(h=>{
-                html += `<tr><td><span class="hour-pill">${h}</span></td>`;
+            Object.keys(groups).sort().forEach(h => {
+                html += `<tr><td><span class="hour-pill">${h.slice(-2)}</span></td>`;
                 [0,10,20,30,40,50].forEach(b=>{
                     const list = groups[h][b].map(t=>`<span class="time-pill">${t.minute}</span>`).join(' ');
                     html += `<td>${list}</td>`;
